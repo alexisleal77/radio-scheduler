@@ -57,3 +57,5 @@ measuring cost.
 ## Status
 
 Architecture and module boundaries are defined. Implementation language, concrete data formats, and the exact `scheduling_interface` contract are not yet decided — that is the next step.
+
+Architecturally significant decisions, once made, are recorded as ADRs in [`docs/adr/`](adr/).

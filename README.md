@@ -26,7 +26,7 @@ tests/                        Functional tests with expected outputs
 scripts/                      Operational entry points (run benchmarks, generate reports, etc.)
 ```
 
-See [`docs/architecture.md`](docs/architecture.md) for the full architecture, including module responsibilities and data flow.
+See [`docs/architecture.md`](docs/architecture.md) for the full architecture, including module responsibilities and data flow. Architecturally significant decisions are recorded in [`docs/adr/`](docs/adr/).
 
 ## Status
 
