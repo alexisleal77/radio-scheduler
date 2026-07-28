@@ -1,3 +1,3 @@
-from radio_scheduler.domain.entities import TTI
+from radio_scheduler.domain.entities import QoSClass, TTI
 
-__all__ = ["TTI"]
+__all__ = ["QoSClass", "TTI"]
