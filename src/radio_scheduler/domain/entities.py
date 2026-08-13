@@ -17,7 +17,9 @@ class QoSClass:
 
 @dataclass(frozen=True)
 class ChannelQuality:
-    """3GPP CQI reading (0-15) for one UE at one TTI. Exogenous state (ADR-002)."""
+    """CQI reading (0-15) for one UE at one TTI: 1-15 are reportable CQI indices,
+    0 means no usable CQI indication (out of range / not reported). Exogenous
+    state (ADR-002); see ADR-006 for the full semantics."""
 
     tti: TTI
     ue_id: str
