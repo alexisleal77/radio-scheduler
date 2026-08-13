@@ -23,9 +23,9 @@ src/radio_scheduler/                   Python package (ADR-004, ADR-005)
   domain/                               Shared entities — implemented
   scenario_generator/                   Generates TTIs, UEs (QoS by round-robin), Resource Blocks, CQI, and traffic arrivals — implemented (v0.1)
   scheduling_interface/                 The shared contract every scheduling algorithm implements — implemented (v0.1)
-  reference_implementations/            Round Robin, Proportional Fair, MaxCQI, and future algorithms — not yet implemented
+  reference_implementations/            Round Robin — implemented (v0.1); Proportional Fair, MaxCQI, and future algorithms — not yet implemented
   benchmark/                            Measures execution time, CPU, memory, scalability, and performance — not yet implemented
-tests/                                  Functional tests with expected outputs — implemented for scenario_generator and scheduling_interface
+tests/                                  Functional tests with expected outputs — implemented for scenario_generator, scheduling_interface, and Round Robin
 scripts/                                Operational entry points (run benchmarks, generate reports, etc.) — not yet implemented
 ```
 
@@ -39,6 +39,8 @@ The implementation language is Python (ADR-004). The initial architecture — mo
 
 `scheduling_interface` v0.1 is implemented: `ObservableState` defines exactly what a scheduling algorithm may observe at one TTI — the current TTI, eligible UEs, available Resource Blocks, Channel Quality, and Buffer/HARQ state (Buffer already reflects the current TTI's Traffic Arrival, so Traffic Arrival is not provided separately); nothing from any other TTI, and no final metrics. A scheduling algorithm's internal state is explicit and threaded by the caller — each step receives it and returns a new one, never holding it as hidden mutable state — and a single step may return zero or more `AllocationDecision` values. `radio_scheduler.domain.Scheduler` (an algorithm's identity — name/version) and `SchedulingAlgorithm` (its behavioral contract) are deliberately distinct types. See [`ADR-008`](docs/adr/ADR-008-scheduler-statefulness.md) for the full contract.
 
-Both `scenario_generator` and `scheduling_interface` are covered by automated tests using the standard-library `unittest` (see [`tests/README.md`](tests/README.md)). No scheduling algorithm (Round Robin, Proportional Fair, MaxCQI), the Simulation Loop, or `benchmark` is implemented yet.
+`reference_implementations` has one algorithm implemented: `RoundRobin`, a frequency-domain scheduler that distributes each TTI's Resource Blocks one at a time across eligible UEs (`Buffer.occupancy_bytes > 0`), cycling through `observable_state.ues` in its given order — never re-sorted by `ue_id` — and resuming the rotation from the position right after the last-served UE, skipping temporarily ineligible UEs without resetting. Its state (`RoundRobinState`) is threaded explicitly through `initial_state()`/`allocate()`, per the `scheduling_interface` contract.
+
+`scenario_generator`, `scheduling_interface`, and Round Robin are covered by automated tests using the standard-library `unittest` — 72 tests as of this writing (see [`tests/README.md`](tests/README.md)). Proportional Fair, MaxCQI, the Simulation Loop, and `benchmark` are not implemented yet.
 
 `docs/architecture.md` does not currently name a specific next module to implement; the next increment will be decided when work resumes. The project is being built incrementally, one small step at a time.
