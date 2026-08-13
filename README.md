@@ -22,10 +22,10 @@ docs/                                  Design and architecture documentation
 src/radio_scheduler/                   Python package (ADR-004, ADR-005)
   domain/                               Shared entities — implemented
   scenario_generator/                   Generates TTIs, UEs (QoS by round-robin), Resource Blocks, CQI, and traffic arrivals — implemented (v0.1)
-  scheduling_interface/                 The shared contract every scheduling algorithm implements — not yet implemented
+  scheduling_interface/                 The shared contract every scheduling algorithm implements — implemented (v0.1)
   reference_implementations/            Round Robin, Proportional Fair, MaxCQI, and future algorithms — not yet implemented
   benchmark/                            Measures execution time, CPU, memory, scalability, and performance — not yet implemented
-tests/                                  Functional tests with expected outputs — implemented for scenario_generator
+tests/                                  Functional tests with expected outputs — implemented for scenario_generator and scheduling_interface
 scripts/                                Operational entry points (run benchmarks, generate reports, etc.) — not yet implemented
 ```
 
@@ -35,6 +35,10 @@ See [`docs/architecture.md`](docs/architecture.md) for the full architecture, in
 
 The implementation language is Python (ADR-004). The initial architecture — module boundaries, data flow, and the closed-loop simulation model — is defined, and all architecturally significant decisions are documented as ADRs in [`docs/adr/`](docs/adr/). The domain model ([`docs/specification/domain-model-v0.1.md`](docs/specification/domain-model-v0.1.md)) is implemented as 13 immutable entities in `radio_scheduler.domain`; the `Scenario → Run → AllocationDecision → SchedulingPerformanceMetric` composition has been verified.
 
-`scenario_generator` v0.1 is implemented: given a `ScenarioGeneratorConfig` and a seed, it deterministically produces a `Scenario` — TTIs, UEs with QoS Class assigned by round-robin, Resource Blocks, Channel Quality (CQI), and Traffic Arrivals. Generation is reproducible for a given configuration and seed, per the contract in [`ADR-007`](docs/adr/ADR-007-scenario-generator-reproducibility-contract.md). It is covered by 22 automated tests using the standard-library `unittest` (see [`tests/README.md`](tests/README.md)).
+`scenario_generator` v0.1 is implemented: given a `ScenarioGeneratorConfig` and a seed, it deterministically produces a `Scenario` — TTIs, UEs with QoS Class assigned by round-robin, Resource Blocks, Channel Quality (CQI), and Traffic Arrivals. Generation is reproducible for a given configuration and seed, per the contract in [`ADR-007`](docs/adr/ADR-007-scenario-generator-reproducibility-contract.md).
+
+`scheduling_interface` v0.1 is implemented: `ObservableState` defines exactly what a scheduling algorithm may observe at one TTI — the current TTI, eligible UEs, available Resource Blocks, Channel Quality, and Buffer/HARQ state (Buffer already reflects the current TTI's Traffic Arrival, so Traffic Arrival is not provided separately); nothing from any other TTI, and no final metrics. A scheduling algorithm's internal state is explicit and threaded by the caller — each step receives it and returns a new one, never holding it as hidden mutable state — and a single step may return zero or more `AllocationDecision` values. `radio_scheduler.domain.Scheduler` (an algorithm's identity — name/version) and `SchedulingAlgorithm` (its behavioral contract) are deliberately distinct types. See [`ADR-008`](docs/adr/ADR-008-scheduler-statefulness.md) for the full contract.
+
+Both `scenario_generator` and `scheduling_interface` are covered by automated tests using the standard-library `unittest` (see [`tests/README.md`](tests/README.md)). No scheduling algorithm (Round Robin, Proportional Fair, MaxCQI), the Simulation Loop, or `benchmark` is implemented yet.
 
 `docs/architecture.md` does not currently name a specific next module to implement; the next increment will be decided when work resumes. The project is being built incrementally, one small step at a time.
