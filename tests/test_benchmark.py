@@ -6,6 +6,7 @@ import unittest
 from dataclasses import FrozenInstanceError, dataclass, fields
 from unittest.mock import patch
 
+import radio_scheduler.benchmark as benchmark_package
 import radio_scheduler.benchmark.measurement as measurement
 from radio_scheduler.benchmark.measurement import (
     BenchmarkResult,
@@ -848,6 +849,32 @@ class BenchmarkRunBehaviorTests(unittest.TestCase):
                 self.assertIsInstance(result.median_wall_time_ns, float)
                 self.assertIsInstance(result.median_cpu_time_ns, float)
                 self.assertIsInstance(result.median_peak_traced_memory_bytes, float)
+
+
+class BenchmarkPackageExportsTests(unittest.TestCase):
+    def test_public_symbols_importable_directly_from_benchmark_package(self):
+        from radio_scheduler.benchmark import (
+            BenchmarkResult as PublicBenchmarkResult,
+            RunMeasurement as PublicRunMeasurement,
+            benchmark_run as public_benchmark_run,
+            measure_run as public_measure_run,
+        )
+
+        self.assertIs(PublicBenchmarkResult, measurement.BenchmarkResult)
+        self.assertIs(PublicRunMeasurement, measurement.RunMeasurement)
+        self.assertIs(public_benchmark_run, measurement.benchmark_run)
+        self.assertIs(public_measure_run, measurement.measure_run)
+
+    def test_all_lists_exactly_the_four_public_symbols(self):
+        self.assertEqual(
+            set(benchmark_package.__all__),
+            {"BenchmarkResult", "RunMeasurement", "benchmark_run", "measure_run"},
+        )
+        self.assertEqual(len(benchmark_package.__all__), 4)
+
+    def test_gather_provenance_is_not_publicly_exported(self):
+        self.assertNotIn("_gather_provenance", benchmark_package.__all__)
+        self.assertFalse(hasattr(benchmark_package, "_gather_provenance"))
 
 
 if __name__ == "__main__":
