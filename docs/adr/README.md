@@ -27,6 +27,12 @@ Status changes are recorded in the ADR itself (e.g., "Superseded by ADR-005"); A
 
 `ADR-NNN-short-kebab-case-title.md`, where `NNN` is a zero-padded, sequential, never-reused number (e.g., `ADR-001-open-loop-vs-closed-loop-simulation.md`). Numbers are assigned in the order ADRs are created, regardless of status. `ADR-000-template.md` is the template and is not itself a decision record.
 
+## Portuguese (pt-BR) translations
+
+Every ADR — from `ADR-001` onward, including the `ADR-000-template.md` template — has a companion Portuguese (pt-BR) translation in [`docs/adr/pt-BR/`](pt-BR/), under the exact same filename. The English document in this directory is the canonical version of every decision; the pt-BR translation exists for accessibility and reference. Where a translation and its English original diverge, the English original governs.
+
+Creating a new ADR, or editing an existing one, requires updating both versions in the same commit — a translation must never be allowed to fall behind its original. See [`docs/adr/pt-BR/README.md`](pt-BR/README.md) for the translation's own conventions, including how the controlled `Status` values are handled.
+
 ## Only architecturally significant decisions
 
 Not every choice needs an ADR. Reserve them for decisions that shape the architecture and would be costly to change later — module boundaries, interface contracts, data flow, reproducibility, and similar structural choices. Implementation details, naming, and easily reversible choices belong in code, code review, or regular documentation instead.
