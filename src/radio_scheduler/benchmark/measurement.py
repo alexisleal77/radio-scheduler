@@ -1,4 +1,16 @@
+import gc
+import os
+import platform
+import time
+import tracemalloc
 from dataclasses import dataclass
+from typing import TypeVar
+
+from radio_scheduler.domain import Scenario, Scheduler
+from radio_scheduler.scheduling_interface import SchedulingAlgorithm
+from radio_scheduler.simulation_loop import run
+
+StateT = TypeVar("StateT")
 
 
 @dataclass(frozen=True)
@@ -71,3 +83,87 @@ class BenchmarkResult:
     machine: str
     processor: str
     cpu_count: int | None
+
+
+def _gather_provenance(scenario: Scenario, scheduler: Scheduler) -> dict[str, object]:
+    """The twelve provenance fields shared by `RunMeasurement` and
+    `BenchmarkResult` (ADR-010 points 8-9), read directly off `scenario`
+    and `scheduler` plus the standard-library environment probes named in
+    docs/specification/benchmark-v0.1.md's flow step 4."""
+    ttis_ascending = tuple(sorted(scenario.ttis, key=lambda tti: tti.index))
+    resource_blocks_per_tti = tuple(
+        sum(1 for rb in scenario.resource_blocks if rb.tti == tti)
+        for tti in ttis_ascending
+    )
+    return {
+        "scenario_seed": scenario.seed,
+        "scenario_num_ttis": len(scenario.ttis),
+        "scenario_num_ues": len(scenario.ues),
+        "scenario_resource_blocks_per_tti": resource_blocks_per_tti,
+        "scheduler_name": scheduler.name,
+        "scheduler_version": scheduler.version,
+        "python_implementation": platform.python_implementation(),
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "processor": platform.processor(),
+        "cpu_count": os.cpu_count(),
+    }
+
+
+def measure_run(
+    scenario: Scenario,
+    scheduler: Scheduler,
+    algorithm: SchedulingAlgorithm[StateT],
+    pipeline_delay: int = 0,
+) -> RunMeasurement:
+    """Takes exactly one measured sample of `(scenario, scheduler,
+    algorithm)` (ADR-010, docs/specification/benchmark-v0.1.md).
+
+    Executes `simulation_loop.run(scenario, algorithm, pipeline_delay)`
+    twice internally: once timed (pass a, wall-clock and CPU time, no
+    `tracemalloc`), once traced (pass b, `tracemalloc` active, for peak
+    memory) — never both at once, since `tracemalloc`'s own overhead would
+    perturb the timing figures. Raises `RuntimeError` immediately, with
+    zero calls to `simulation_loop.run()`, if `tracemalloc.is_tracing()` is
+    already `True` on entry; raises `RuntimeError` again, discarding pass
+    (a)'s results and with pass (b) never executed, if tracemalloc became
+    active between the two passes. Never mutates `scenario`, `scheduler`,
+    or `algorithm`; never verifies that `scheduler` actually identifies
+    `algorithm`.
+    """
+    if tracemalloc.is_tracing():
+        raise RuntimeError(
+            "tracemalloc is already tracing; measure_run() requires "
+            "tracemalloc to be inactive when called"
+        )
+
+    gc.collect()
+    t0_wall = time.perf_counter_ns()
+    t0_cpu = time.process_time_ns()
+    run(scenario, algorithm, pipeline_delay)
+    t1_wall = time.perf_counter_ns()
+    t1_cpu = time.process_time_ns()
+    wall_time_ns = t1_wall - t0_wall
+    cpu_time_ns = t1_cpu - t0_cpu
+
+    gc.collect()
+    if tracemalloc.is_tracing():
+        raise RuntimeError(
+            "tracemalloc became active between measure_run()'s timing and "
+            "memory passes; aborting before the memory pass"
+        )
+
+    tracemalloc.start()
+    try:
+        run(scenario, algorithm, pipeline_delay)
+        _, peak_traced_memory_bytes = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+
+    return RunMeasurement(
+        wall_time_ns=wall_time_ns,
+        cpu_time_ns=cpu_time_ns,
+        peak_traced_memory_bytes=peak_traced_memory_bytes,
+        **_gather_provenance(scenario, scheduler),
+    )

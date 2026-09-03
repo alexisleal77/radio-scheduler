@@ -1,7 +1,27 @@
+import gc
+import os
+import platform
+import tracemalloc
 import unittest
-from dataclasses import FrozenInstanceError, fields
+from dataclasses import FrozenInstanceError, dataclass, fields
+from unittest.mock import patch
 
-from radio_scheduler.benchmark.measurement import BenchmarkResult, RunMeasurement
+import radio_scheduler.benchmark.measurement as measurement
+from radio_scheduler.benchmark.measurement import BenchmarkResult, RunMeasurement, measure_run
+from radio_scheduler.domain import (
+    ChannelQuality,
+    QoSClass,
+    ResourceBlock,
+    Scenario,
+    Scheduler,
+    TrafficArrival,
+    TTI,
+    UE,
+)
+from radio_scheduler.reference_implementations import MaxCQI, ProportionalFair, RoundRobin
+from radio_scheduler.scenario_generator import ScenarioGeneratorConfig, generate_scenario
+from radio_scheduler.scheduling_interface import SchedulingStepResult
+from radio_scheduler.simulation_loop import run as run_simulation
 
 RUN_MEASUREMENT_FIELDS = (
     ("wall_time_ns", int),
@@ -264,6 +284,311 @@ class BenchmarkResultFieldShapeTests(unittest.TestCase):
         )
         self.assertEqual(result.scenario_resource_blocks_per_tti, (1, 3, 2))
         self.assertIsInstance(result.scenario_resource_blocks_per_tti, tuple)
+
+
+def make_scenario(
+    num_ues=2,
+    num_ttis=2,
+    resource_blocks_per_tti=1,
+    cqi=10,
+    arrival_size_bytes=100,
+    seed=0,
+):
+    """Hand-built Scenario (not via generate_scenario) with uniform
+    per-TTI Resource Block counts, for tests where the exact Resource
+    Block layout does not matter."""
+    ttis = tuple(TTI(index=i) for i in range(num_ttis))
+    ues = tuple(
+        UE(ue_id=f"ue-{i}", qos_class=QoSClass(name="GBR")) for i in range(num_ues)
+    )
+    resource_blocks = tuple(
+        ResourceBlock(tti=tti, block_id=f"rb-{tti.index}-{j}")
+        for tti in ttis
+        for j in range(resource_blocks_per_tti)
+    )
+    channel_qualities = tuple(
+        ChannelQuality(tti=tti, ue_id=ue.ue_id, cqi=cqi) for tti in ttis for ue in ues
+    )
+    traffic_arrivals = tuple(
+        TrafficArrival(tti=tti, ue_id=ue.ue_id, size_bytes=arrival_size_bytes)
+        for tti in ttis
+        for ue in ues
+    )
+    return Scenario(
+        seed=seed,
+        ttis=ttis,
+        ues=ues,
+        resource_blocks=resource_blocks,
+        channel_qualities=channel_qualities,
+        traffic_arrivals=traffic_arrivals,
+    )
+
+
+def make_scenario_with_resource_block_counts(counts, seed=0):
+    """Hand-built Scenario with exactly `counts[i]` ResourceBlocks at TTI
+    i, for tests exercising non-uniform Resource-Block-per-TTI provenance."""
+    ttis = tuple(TTI(index=i) for i in range(len(counts)))
+    ues = (UE(ue_id="ue-0", qos_class=QoSClass(name="GBR")),)
+    resource_blocks = tuple(
+        ResourceBlock(tti=tti, block_id=f"rb-{tti.index}-{j}")
+        for tti, count in zip(ttis, counts)
+        for j in range(count)
+    )
+    channel_qualities = tuple(
+        ChannelQuality(tti=tti, ue_id=ue.ue_id, cqi=10) for tti in ttis for ue in ues
+    )
+    traffic_arrivals = tuple(
+        TrafficArrival(tti=tti, ue_id=ue.ue_id, size_bytes=100)
+        for tti in ttis
+        for ue in ues
+    )
+    return Scenario(
+        seed=seed,
+        ttis=ttis,
+        ues=ues,
+        resource_blocks=resource_blocks,
+        channel_qualities=channel_qualities,
+        traffic_arrivals=traffic_arrivals,
+    )
+
+
+@dataclass(frozen=True)
+class _CountingState:
+    pass
+
+
+class _CountingAlgorithm:
+    """Test double satisfying SchedulingAlgorithm: counts calls to
+    initial_state()/allocate() without producing any decisions."""
+
+    def __init__(self):
+        self.initial_state_calls = 0
+        self.allocate_calls = 0
+
+    def initial_state(self):
+        self.initial_state_calls += 1
+        return _CountingState()
+
+    def allocate(self, observable_state, scheduler_state):
+        self.allocate_calls += 1
+        return SchedulingStepResult(decisions=(), scheduler_state=scheduler_state)
+
+
+class _TracemallocStartingAlgorithm:
+    """Test double: starts tracemalloc as a side effect of allocate(), to
+    simulate external tracing being activated between measure_run()'s two
+    passes."""
+
+    def initial_state(self):
+        return _CountingState()
+
+    def allocate(self, observable_state, scheduler_state):
+        if not tracemalloc.is_tracing():
+            tracemalloc.start()
+        return SchedulingStepResult(decisions=(), scheduler_state=scheduler_state)
+
+
+class _FailingOnSecondRunAlgorithm:
+    """Test double: succeeds through every TTI of measure_run()'s first
+    execution (pass a) and raises on the first TTI of the second (pass
+    b), to exercise tracemalloc.stop() running via `finally` after a
+    failed memory pass."""
+
+    def __init__(self, num_ttis):
+        self._num_ttis = num_ttis
+        self.allocate_calls = 0
+
+    def initial_state(self):
+        return _CountingState()
+
+    def allocate(self, observable_state, scheduler_state):
+        self.allocate_calls += 1
+        if self.allocate_calls > self._num_ttis:
+            raise RuntimeError("boom: simulated failure during pass (b)")
+        return SchedulingStepResult(decisions=(), scheduler_state=scheduler_state)
+
+
+class _GCStateRecordingAlgorithm:
+    """Test double: records gc.isenabled() every time allocate() is
+    called, to verify garbage collection remains enabled during measured
+    executions of simulation_loop.run()."""
+
+    def __init__(self):
+        self.gc_enabled_observations = []
+
+    def initial_state(self):
+        return _CountingState()
+
+    def allocate(self, observable_state, scheduler_state):
+        self.gc_enabled_observations.append(gc.isenabled())
+        return SchedulingStepResult(decisions=(), scheduler_state=scheduler_state)
+
+
+class MeasureRunBehaviorTests(unittest.TestCase):
+    def test_measure_run_executes_simulation_loop_exactly_twice(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        with patch.object(measurement, "run", wraps=measurement.run) as mock_run:
+            measure_run(scenario, scheduler, algorithm)
+        self.assertEqual(mock_run.call_count, 2)
+
+    def test_measure_run_rejects_already_active_tracemalloc_at_entry(self):
+        scenario = make_scenario()
+        algorithm = _CountingAlgorithm()
+        scheduler = Scheduler(name="Counting", version="0.1")
+        tracemalloc.start()
+        try:
+            with self.assertRaises(RuntimeError):
+                measure_run(scenario, scheduler, algorithm)
+        finally:
+            tracemalloc.stop()
+        self.assertEqual(algorithm.initial_state_calls, 0)
+        self.assertEqual(algorithm.allocate_calls, 0)
+
+    def test_measure_run_rejects_tracemalloc_activated_between_passes(self):
+        scenario = make_scenario(num_ttis=1)
+        algorithm = _TracemallocStartingAlgorithm()
+        scheduler = Scheduler(name="TracemallocStarting", version="0.1")
+        with patch.object(measurement, "run", wraps=measurement.run) as mock_run:
+            try:
+                with self.assertRaises(RuntimeError):
+                    measure_run(scenario, scheduler, algorithm)
+                self.assertEqual(mock_run.call_count, 1)
+                self.assertTrue(tracemalloc.is_tracing())
+            finally:
+                if tracemalloc.is_tracing():
+                    tracemalloc.stop()
+
+    def test_tracemalloc_stopped_after_successful_measurement(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        self.assertFalse(tracemalloc.is_tracing())
+        measure_run(scenario, scheduler, algorithm)
+        self.assertFalse(tracemalloc.is_tracing())
+
+    def test_tracemalloc_stopped_after_failed_measurement(self):
+        scenario = make_scenario(num_ttis=2)
+        algorithm = _FailingOnSecondRunAlgorithm(num_ttis=2)
+        scheduler = Scheduler(name="Failing", version="0.1")
+        self.assertFalse(tracemalloc.is_tracing())
+        with self.assertRaises(RuntimeError):
+            measure_run(scenario, scheduler, algorithm)
+        self.assertFalse(tracemalloc.is_tracing())
+
+    def test_gc_collect_runs_before_each_pass(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        events = []
+        original_gc_collect = measurement.gc.collect
+        original_run = measurement.run
+
+        def recording_gc_collect(*args, **kwargs):
+            events.append("gc.collect")
+            return original_gc_collect(*args, **kwargs)
+
+        def recording_run(*args, **kwargs):
+            events.append("run")
+            return original_run(*args, **kwargs)
+
+        with patch.object(
+            measurement.gc, "collect", side_effect=recording_gc_collect
+        ) as mock_collect, patch.object(
+            measurement, "run", side_effect=recording_run
+        ) as mock_run:
+            measure_run(scenario, scheduler, algorithm)
+
+        self.assertEqual(mock_collect.call_count, 2)
+        self.assertEqual(mock_run.call_count, 2)
+        self.assertEqual(events, ["gc.collect", "run", "gc.collect", "run"])
+
+    def test_garbage_collection_remains_enabled_during_measured_calls(self):
+        scenario = make_scenario()
+        algorithm = _GCStateRecordingAlgorithm()
+        scheduler = Scheduler(name="GCRecording", version="0.1")
+        self.assertTrue(gc.isenabled())
+        measure_run(scenario, scheduler, algorithm)
+        self.assertTrue(algorithm.gc_enabled_observations)
+        self.assertTrue(all(algorithm.gc_enabled_observations))
+
+    def test_run_measurement_fields_are_non_negative_integers(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        result = measure_run(scenario, scheduler, algorithm)
+        for value in (
+            result.wall_time_ns,
+            result.cpu_time_ns,
+            result.peak_traced_memory_bytes,
+        ):
+            self.assertIsInstance(value, int)
+            self.assertGreaterEqual(value, 0)
+
+    def test_measure_run_provenance_fields_populated_correctly(self):
+        config = ScenarioGeneratorConfig(
+            seed=7,
+            num_ues=3,
+            num_ttis=4,
+            resource_blocks_per_tti=2,
+            qos_class_names=("GBR",),
+        )
+        scenario = generate_scenario(config)
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        result = measure_run(scenario, scheduler, algorithm)
+        self.assertEqual(result.scenario_seed, 7)
+        self.assertEqual(result.scenario_num_ttis, 4)
+        self.assertEqual(result.scenario_num_ues, 3)
+        self.assertEqual(result.scenario_resource_blocks_per_tti, (2, 2, 2, 2))
+        self.assertEqual(result.scheduler_name, "RoundRobin")
+        self.assertEqual(result.scheduler_version, "0.1")
+        self.assertEqual(
+            result.python_implementation, platform.python_implementation()
+        )
+        self.assertEqual(result.python_version, platform.python_version())
+        self.assertEqual(result.platform, platform.platform())
+        self.assertEqual(result.machine, platform.machine())
+        self.assertEqual(result.processor, platform.processor())
+        self.assertEqual(result.cpu_count, os.cpu_count())
+
+    def test_measure_run_scenario_resource_blocks_per_tti_reflects_non_uniform_counts(
+        self,
+    ):
+        scenario = make_scenario_with_resource_block_counts((1, 3, 2))
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        result = measure_run(scenario, scheduler, algorithm)
+        self.assertEqual(result.scenario_resource_blocks_per_tti, (1, 3, 2))
+
+    def test_scheduler_identity_mismatch_is_not_verified(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        mismatched_scheduler = Scheduler(name="NotRoundRobin", version="99.9")
+        result = measure_run(scenario, mismatched_scheduler, algorithm)
+        self.assertEqual(result.scheduler_name, "NotRoundRobin")
+        self.assertEqual(result.scheduler_version, "99.9")
+
+    def test_measure_run_does_not_alter_decisions_for_reference_algorithms(self):
+        config = ScenarioGeneratorConfig(
+            seed=11,
+            num_ues=3,
+            num_ttis=3,
+            resource_blocks_per_tti=2,
+            qos_class_names=("GBR", "Best Effort"),
+        )
+        scenario = generate_scenario(config)
+        for algorithm, name in (
+            (RoundRobin(), "RoundRobin"),
+            (ProportionalFair(), "ProportionalFair"),
+            (MaxCQI(), "MaxCQI"),
+        ):
+            with self.subTest(algorithm=name):
+                baseline = run_simulation(scenario, algorithm)
+                measure_run(scenario, Scheduler(name=name, version="0.1"), algorithm)
+                after = run_simulation(scenario, algorithm)
+                self.assertEqual(after.decisions, baseline.decisions)
 
 
 if __name__ == "__main__":
