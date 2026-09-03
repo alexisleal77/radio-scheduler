@@ -17,7 +17,7 @@ A modular environment for developing, testing, benchmarking, and comparing radio
 
 ```
 docs/                                  Design and architecture documentation
-  adr/                                  Architecture Decision Records (ADR-001..ADR-009)
+  adr/                                  Architecture Decision Records (ADR-001..ADR-010)
   specification/domain-model-v0.1.md    Canonical domain model
 src/radio_scheduler/                   Python package (ADR-004, ADR-005)
   domain/                               Shared entities — implemented
@@ -25,8 +25,8 @@ src/radio_scheduler/                   Python package (ADR-004, ADR-005)
   scheduling_interface/                 The shared contract every scheduling algorithm implements — implemented (v0.1)
   reference_implementations/            Round Robin, Proportional Fair, MaxCQI — implemented (v0.1); future algorithms — not yet implemented
   simulation_loop/                      Runs a scheduling algorithm against a Scenario, TTI by TTI — implemented (v0.1)
-  benchmark/                            Measures execution time, CPU, memory, scalability, and performance — not yet implemented
-tests/                                  Functional tests with expected outputs — implemented for scenario_generator, scheduling_interface, Round Robin, Proportional Fair, MaxCQI, and simulation_loop
+  benchmark/                            Measures computational cost (wall-clock time, CPU time, peak traced Python memory) of running a scheduling algorithm — implemented (v0.1); radio-performance metrics (throughput, fairness, latency/QoS) out of scope
+tests/                                  Functional tests with expected outputs — implemented for scenario_generator, scheduling_interface, Round Robin, Proportional Fair, MaxCQI, simulation_loop, and benchmark
 scripts/                                Operational entry points (run benchmarks, generate reports, etc.) — not yet implemented
 ```
 
@@ -44,6 +44,8 @@ The implementation language is Python (ADR-004). The initial architecture — mo
 
 `simulation_loop` v0.1 executes any `SchedulingAlgorithm` over a `Scenario` in ascending TTI order. At each TTI, it applies traffic arrivals, builds the `ObservableState`, invokes `allocate()` once, validates the returned decisions, updates the buffers, and records an immutable result. The current version supports only `pipeline_delay=0`; see [ADR-009](docs/adr/ADR-009-simulation-loop-v0.1.md) for its constraints and deferred features.
 
-`scenario_generator`, `scheduling_interface`, `RoundRobin`, `ProportionalFair`, `MaxCQI`, and `simulation_loop` are covered by automated tests using the standard-library `unittest` — 135 tests as of this writing (see [`tests/README.md`](tests/README.md)). `benchmark` is not implemented yet.
+`benchmark` v0.1 measures the computational cost of running `simulation_loop.run()` for one `(Scenario, Scheduler, SchedulingAlgorithm)` combination: wall-clock time, CPU time, and peak Python-allocator-traced memory, via `measure_run()` (one sample) and `benchmark_run()` (one warm-up execution plus 10 repetitions by default, preserving every sample and reporting the median of each metric). Scheduling-performance metrics — throughput, fairness, packet latency, QoS satisfaction — remain out of scope for v0.1, deferred until a CQI-to-rate/capacity model exists in the domain. See [`ADR-010`](docs/adr/ADR-010-computational-cost-benchmark-v0.1.md), [`docs/specification/benchmark-v0.1.md`](docs/specification/benchmark-v0.1.md), and [`src/radio_scheduler/benchmark/README.md`](src/radio_scheduler/benchmark/README.md) for the full contract.
+
+`scenario_generator`, `scheduling_interface`, `RoundRobin`, `ProportionalFair`, `MaxCQI`, `simulation_loop`, and `benchmark` are covered by automated tests using the standard-library `unittest` — 181 tests across 7 files as of this writing (see [`tests/README.md`](tests/README.md)).
 
 `docs/architecture.md` does not currently name a specific next module to implement; the next increment will be decided when work resumes. The project is being built incrementally, one small step at a time.
