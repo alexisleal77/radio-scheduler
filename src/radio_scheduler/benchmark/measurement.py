@@ -1,6 +1,7 @@
 import gc
 import os
 import platform
+import statistics
 import time
 import tracemalloc
 from dataclasses import dataclass
@@ -165,5 +166,51 @@ def measure_run(
         wall_time_ns=wall_time_ns,
         cpu_time_ns=cpu_time_ns,
         peak_traced_memory_bytes=peak_traced_memory_bytes,
+        **_gather_provenance(scenario, scheduler),
+    )
+
+
+def benchmark_run(
+    scenario: Scenario,
+    scheduler: Scheduler,
+    algorithm: SchedulingAlgorithm[StateT],
+    repetitions: int = 10,
+    pipeline_delay: int = 0,
+) -> BenchmarkResult:
+    """Runs one uncounted warm-up execution, then calls `measure_run`
+    `repetitions` times, preserving every sample and computing medians
+    (ADR-010, docs/specification/benchmark-v0.1.md).
+
+    Raises `ValueError` immediately, before any execution, if
+    `repetitions < 1`. The warm-up execution of
+    `simulation_loop.run(scenario, algorithm, pipeline_delay)` is
+    discarded and never contributes to `samples` or to any of the three
+    medians. A successful call executes `simulation_loop.run()` exactly
+    `1 + 2 * repetitions` times (1 warm-up, plus 2 per `measure_run`
+    call). If the warm-up or any `measure_run` call raises, that
+    exception propagates immediately and no `BenchmarkResult` — partial
+    or otherwise — is returned.
+    """
+    if repetitions < 1:
+        raise ValueError(f"repetitions must be >= 1 (got {repetitions})")
+
+    run(scenario, algorithm, pipeline_delay)
+
+    samples = tuple(
+        measure_run(scenario, scheduler, algorithm, pipeline_delay)
+        for _ in range(repetitions)
+    )
+
+    median_wall_time_ns = float(statistics.median(s.wall_time_ns for s in samples))
+    median_cpu_time_ns = float(statistics.median(s.cpu_time_ns for s in samples))
+    median_peak_traced_memory_bytes = float(
+        statistics.median(s.peak_traced_memory_bytes for s in samples)
+    )
+
+    return BenchmarkResult(
+        samples=samples,
+        median_wall_time_ns=median_wall_time_ns,
+        median_cpu_time_ns=median_cpu_time_ns,
+        median_peak_traced_memory_bytes=median_peak_traced_memory_bytes,
         **_gather_provenance(scenario, scheduler),
     )
