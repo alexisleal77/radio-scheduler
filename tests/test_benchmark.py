@@ -7,7 +7,12 @@ from dataclasses import FrozenInstanceError, dataclass, fields
 from unittest.mock import patch
 
 import radio_scheduler.benchmark.measurement as measurement
-from radio_scheduler.benchmark.measurement import BenchmarkResult, RunMeasurement, measure_run
+from radio_scheduler.benchmark.measurement import (
+    BenchmarkResult,
+    RunMeasurement,
+    benchmark_run,
+    measure_run,
+)
 from radio_scheduler.domain import (
     ChannelQuality,
     QoSClass,
@@ -589,6 +594,260 @@ class MeasureRunBehaviorTests(unittest.TestCase):
                 measure_run(scenario, Scheduler(name=name, version="0.1"), algorithm)
                 after = run_simulation(scenario, algorithm)
                 self.assertEqual(after.decisions, baseline.decisions)
+
+
+class BenchmarkRunBehaviorTests(unittest.TestCase):
+    def test_benchmark_run_rejects_zero_and_negative_repetitions(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        for repetitions in (0, -1, -5):
+            with self.subTest(repetitions=repetitions):
+                with patch.object(measurement, "run") as mock_run, patch.object(
+                    measurement, "measure_run"
+                ) as mock_measure_run:
+                    with self.assertRaises(ValueError):
+                        benchmark_run(
+                            scenario, scheduler, algorithm, repetitions=repetitions
+                        )
+                mock_run.assert_not_called()
+                mock_measure_run.assert_not_called()
+
+    def test_benchmark_run_default_repetitions_is_ten(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        fake_samples = [make_run_measurement(wall_time_ns=n) for n in range(10)]
+        with patch.object(measurement, "run"), patch.object(
+            measurement, "measure_run", side_effect=fake_samples
+        ) as mock_measure_run:
+            result = benchmark_run(scenario, scheduler, algorithm)
+        self.assertEqual(mock_measure_run.call_count, 10)
+        self.assertEqual(len(result.samples), 10)
+
+    def test_benchmark_run_executes_exactly_one_warmup(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        fake_samples = [make_run_measurement(wall_time_ns=n) for n in range(3)]
+        with patch.object(measurement, "run") as mock_run, patch.object(
+            measurement, "measure_run", side_effect=fake_samples
+        ):
+            benchmark_run(scenario, scheduler, algorithm, repetitions=3)
+        self.assertEqual(mock_run.call_count, 1)
+
+    def test_benchmark_run_calls_measure_run_exactly_repetitions_times(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        for repetitions in (1, 3, 7):
+            with self.subTest(repetitions=repetitions):
+                fake_samples = [
+                    make_run_measurement(wall_time_ns=n) for n in range(repetitions)
+                ]
+                with patch.object(measurement, "run"), patch.object(
+                    measurement, "measure_run", side_effect=fake_samples
+                ) as mock_measure_run:
+                    benchmark_run(
+                        scenario, scheduler, algorithm, repetitions=repetitions
+                    )
+                self.assertEqual(mock_measure_run.call_count, repetitions)
+
+    def test_benchmark_run_executes_simulation_loop_1_plus_2n_times(self):
+        scenario = make_scenario(num_ues=2, num_ttis=1, resource_blocks_per_tti=1)
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        for repetitions in (1, 3, 5):
+            with self.subTest(repetitions=repetitions):
+                with patch.object(
+                    measurement, "run", wraps=measurement.run
+                ) as mock_run:
+                    benchmark_run(
+                        scenario, scheduler, algorithm, repetitions=repetitions
+                    )
+                self.assertEqual(mock_run.call_count, 1 + 2 * repetitions)
+
+    def test_benchmark_run_executes_simulation_loop_21_times_for_default_repetitions(
+        self,
+    ):
+        scenario = make_scenario(num_ues=2, num_ttis=1, resource_blocks_per_tti=1)
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        with patch.object(measurement, "run", wraps=measurement.run) as mock_run:
+            benchmark_run(scenario, scheduler, algorithm)
+        self.assertEqual(mock_run.call_count, 21)
+
+    def test_warmup_result_not_included_in_samples_or_medians(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        fake_samples = [
+            make_run_measurement(wall_time_ns=v)
+            for v in (1_000_000, 2_000_000, 3_000_000)
+        ]
+        with patch.object(measurement, "run") as mock_run, patch.object(
+            measurement, "measure_run", side_effect=fake_samples
+        ):
+            result = benchmark_run(scenario, scheduler, algorithm, repetitions=3)
+        self.assertEqual(result.samples, tuple(fake_samples))
+        self.assertEqual(result.median_wall_time_ns, 2_000_000.0)
+        mock_run.assert_called_once()
+
+    def test_len_samples_equals_repetitions_for_multiple_values(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        for repetitions in (1, 2, 5, 10):
+            with self.subTest(repetitions=repetitions):
+                fake_samples = [
+                    make_run_measurement(wall_time_ns=n) for n in range(repetitions)
+                ]
+                with patch.object(measurement, "run"), patch.object(
+                    measurement, "measure_run", side_effect=fake_samples
+                ):
+                    result = benchmark_run(
+                        scenario, scheduler, algorithm, repetitions=repetitions
+                    )
+                self.assertEqual(len(result.samples), repetitions)
+
+    def test_samples_preserve_order_and_identity_from_measure_run(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        fake_samples = [make_run_measurement(wall_time_ns=n) for n in (5, 1, 9, 3)]
+        with patch.object(measurement, "run"), patch.object(
+            measurement, "measure_run", side_effect=fake_samples
+        ):
+            result = benchmark_run(scenario, scheduler, algorithm, repetitions=4)
+        self.assertEqual(result.samples, tuple(fake_samples))
+        for expected, actual in zip(fake_samples, result.samples):
+            self.assertIs(expected, actual)
+
+    def test_benchmark_run_median_correct_for_even_repetitions(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        values = (100, 200, 300, 400)
+        fake_samples = [
+            make_run_measurement(
+                wall_time_ns=v, cpu_time_ns=v * 2, peak_traced_memory_bytes=v * 3
+            )
+            for v in values
+        ]
+        with patch.object(measurement, "run"), patch.object(
+            measurement, "measure_run", side_effect=fake_samples
+        ):
+            result = benchmark_run(scenario, scheduler, algorithm, repetitions=4)
+        self.assertEqual(result.median_wall_time_ns, 250.0)
+        self.assertEqual(result.median_cpu_time_ns, 500.0)
+        self.assertEqual(result.median_peak_traced_memory_bytes, 750.0)
+        self.assertIsInstance(result.median_wall_time_ns, float)
+        self.assertIsInstance(result.median_cpu_time_ns, float)
+        self.assertIsInstance(result.median_peak_traced_memory_bytes, float)
+
+    def test_benchmark_run_median_correct_for_odd_repetitions(self):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        values = (100, 200, 300)
+        fake_samples = [
+            make_run_measurement(
+                wall_time_ns=v, cpu_time_ns=v * 2, peak_traced_memory_bytes=v * 3
+            )
+            for v in values
+        ]
+        with patch.object(measurement, "run"), patch.object(
+            measurement, "measure_run", side_effect=fake_samples
+        ):
+            result = benchmark_run(scenario, scheduler, algorithm, repetitions=3)
+        # statistics.median([100, 200, 300]) returns the middle element
+        # itself (int 200) — benchmark_run must still convert it to float.
+        self.assertEqual(result.median_wall_time_ns, 200.0)
+        self.assertEqual(result.median_cpu_time_ns, 400.0)
+        self.assertEqual(result.median_peak_traced_memory_bytes, 600.0)
+        self.assertIsInstance(result.median_wall_time_ns, float)
+        self.assertIsInstance(result.median_cpu_time_ns, float)
+        self.assertIsInstance(result.median_peak_traced_memory_bytes, float)
+
+    def test_benchmark_result_provenance_matches_samples_provenance(self):
+        scenario = make_scenario(num_ues=2, num_ttis=1, resource_blocks_per_tti=1)
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        result = benchmark_run(scenario, scheduler, algorithm, repetitions=2)
+        provenance_fields = (
+            "scenario_seed",
+            "scenario_num_ttis",
+            "scenario_num_ues",
+            "scenario_resource_blocks_per_tti",
+            "scheduler_name",
+            "scheduler_version",
+            "python_implementation",
+            "python_version",
+            "platform",
+            "machine",
+            "processor",
+            "cpu_count",
+        )
+        for field in provenance_fields:
+            with self.subTest(field=field):
+                for sample in result.samples:
+                    self.assertEqual(getattr(result, field), getattr(sample, field))
+
+    def test_benchmark_run_propagates_warmup_exception_without_calling_measure_run(
+        self,
+    ):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        with patch.object(
+            measurement, "run", side_effect=RuntimeError("boom: warm-up failure")
+        ) as mock_run, patch.object(measurement, "measure_run") as mock_measure_run:
+            with self.assertRaises(RuntimeError):
+                benchmark_run(scenario, scheduler, algorithm, repetitions=3)
+        self.assertEqual(mock_run.call_count, 1)
+        mock_measure_run.assert_not_called()
+
+    def test_benchmark_run_propagates_measure_run_exception_without_partial_result(
+        self,
+    ):
+        scenario = make_scenario()
+        algorithm = RoundRobin()
+        scheduler = Scheduler(name="RoundRobin", version="0.1")
+        good_samples = [make_run_measurement(wall_time_ns=n) for n in (100, 200)]
+        side_effect = good_samples + [RuntimeError("boom: failing repetition")]
+        with patch.object(measurement, "run") as mock_run, patch.object(
+            measurement, "measure_run", side_effect=side_effect
+        ) as mock_measure_run:
+            with self.assertRaises(RuntimeError):
+                benchmark_run(scenario, scheduler, algorithm, repetitions=3)
+        self.assertEqual(mock_run.call_count, 1)
+        self.assertEqual(mock_measure_run.call_count, 3)
+
+    def test_benchmark_run_end_to_end_for_reference_algorithms(self):
+        config = ScenarioGeneratorConfig(
+            seed=13,
+            num_ues=3,
+            num_ttis=2,
+            resource_blocks_per_tti=2,
+            qos_class_names=("GBR", "Best Effort"),
+        )
+        scenario = generate_scenario(config)
+        for algorithm, name in (
+            (RoundRobin(), "RoundRobin"),
+            (ProportionalFair(), "ProportionalFair"),
+            (MaxCQI(), "MaxCQI"),
+        ):
+            with self.subTest(algorithm=name):
+                result = benchmark_run(
+                    scenario,
+                    Scheduler(name=name, version="0.1"),
+                    algorithm,
+                    repetitions=2,
+                )
+                self.assertEqual(len(result.samples), 2)
+                self.assertIsInstance(result.median_wall_time_ns, float)
+                self.assertIsInstance(result.median_cpu_time_ns, float)
+                self.assertIsInstance(result.median_peak_traced_memory_bytes, float)
 
 
 if __name__ == "__main__":
