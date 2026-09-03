@@ -27,9 +27,7 @@ Concrete schedulers implementing `scheduling_interface`: Round Robin, Proportion
 Runs a `scheduling_interface` implementation against a `scenario_generator`-produced Scenario, TTI by TTI: applies each TTI's exogenous state, tracks the decision-dependent state produced by the algorithm's own allocation decisions, and produces the resulting sequence of Allocation Decisions. This is the module that actually exercises `reference_implementations` output against scenario data — `benchmark` and `tests` build on it rather than reimplementing this loop themselves.
 
 ### `benchmark`
-Runs one or more schedulers against one or more scenarios and records two categories of results:
-- **Scheduling performance**: throughput, fairness, latency/QoS satisfaction, etc.
-- **System cost**: execution time, CPU, memory, and scalability as the number of UEs/resource blocks grows.
+Runs one or more schedulers against one or more scenarios and measures their **computational cost**: wall-clock time, CPU time, and peak Python-allocator-traced memory (ADR-010). Scheduling-performance metrics — throughput, fairness, latency/QoS satisfaction — remain out of scope for v0.1, deferred as a single atomic unit until a CQI-to-rate/capacity model exists in `domain`.
 
 Benchmarking is about *comparing* algorithms, not verifying correctness.
 
@@ -49,10 +47,12 @@ simulation_loop                       (runs a scheduling_interface
       │  implementation — one of reference_implementations/* — TTI by
       │  TTI, producing allocation decisions)
       ▼
-benchmark  ──────────────┐
-      │ measures          │
-      ▼                   ▼
-performance metrics   system metrics (time/CPU/memory/scalability)
+benchmark
+      │  measures computational cost (wall-clock time, CPU time, peak
+      │  traced Python memory) — scheduling-performance metrics
+      │  deferred (ADR-010)
+      ▼
+computational cost measurements
 
 tests consume the same scenario_generator + scheduling_interface +
 simulation_loop seam, but assert decisions against known-correct
@@ -63,6 +63,6 @@ expected output instead of measuring cost.
 
 ## Status
 
-Architecture and module boundaries are defined. The implementation language is Python (ADR-004). `domain` is implemented as the canonical shared entities (ADR-005). `scenario_generator` and `scheduling_interface` are implemented. `reference_implementations` has three algorithms implemented — Round Robin, Proportional Fair, and MaxCQI. `simulation_loop` v0.1 is implemented (ADR-009). `benchmark` is not yet implemented.
+Architecture and module boundaries are defined. The implementation language is Python (ADR-004). `domain` is implemented as the canonical shared entities (ADR-005). `scenario_generator` and `scheduling_interface` are implemented. `reference_implementations` has three algorithms implemented — Round Robin, Proportional Fair, and MaxCQI. `simulation_loop` v0.1 is implemented (ADR-009). `benchmark` v0.1 is implemented (ADR-010), scoped to computational cost only — scheduling-performance metrics remain deferred.
 
 Architecturally significant decisions, once made, are recorded as ADRs in [`docs/adr/`](adr/).
