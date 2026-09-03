@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the conceptual architecture of Radio Scheduler. It is intentionally language-agnostic — the implementation language has not been chosen yet. Once it is, this document should be extended (not replaced) with concrete type/interface definitions.
+This document describes the conceptual architecture of Radio Scheduler. The implementation language is Python (ADR-004); this document remains conceptual — concrete type/interface definitions live in the code and in each module's own README, not here.
 
 ## Design principles
 
@@ -11,6 +11,9 @@ This document describes the conceptual architecture of Radio Scheduler. It is in
 
 ## Module responsibilities
 
+### `domain`
+Canonical shared entities every other module depends on — UE, Resource Block, Scenario, Allocation Decision, QoS Class, and the rest of the model in `docs/specification/domain-model-v0.1.md`. No component may reinvent or extend these shapes locally; `domain` has no dependency on any other module.
+
 ### `scenario_generator`
 Produces scheduling scenarios: network states over time (UEs, channel quality/CQI, buffer/traffic demand, available resource blocks, QoS class, etc.) that scheduling algorithms are evaluated against. This module has no knowledge of scheduling algorithms — it only produces data.
 
@@ -19,6 +22,9 @@ Defines the contract every scheduler must implement: given the current network/s
 
 ### `reference_implementations`
 Concrete schedulers implementing `scheduling_interface`: Round Robin, Proportional Fair, MaxCQI, and eventually AI-generated algorithms. These serve both as usable baselines and as worked examples for anyone (human or AI) implementing a new algorithm.
+
+### `simulation_loop`
+Runs a `scheduling_interface` implementation against a `scenario_generator`-produced Scenario, TTI by TTI: applies each TTI's exogenous state, tracks the decision-dependent state produced by the algorithm's own allocation decisions, and produces the resulting sequence of Allocation Decisions. This is the module that actually exercises `reference_implementations` output against scenario data — `benchmark` and `tests` build on it rather than reimplementing this loop themselves.
 
 ### `benchmark`
 Runs one or more schedulers against one or more scenarios and records two categories of results:
@@ -39,23 +45,24 @@ Operational entry points (running a benchmark suite, generating a report, regene
 scenario_generator
       │  produces scenario data (network state over time)
       ▼
-scheduling_interface implementation   (one of reference_implementations/*)
-      │  produces allocation decisions
+simulation_loop                       (runs a scheduling_interface
+      │  implementation — one of reference_implementations/* — TTI by
+      │  TTI, producing allocation decisions)
       ▼
 benchmark  ──────────────┐
       │ measures          │
       ▼                   ▼
 performance metrics   system metrics (time/CPU/memory/scalability)
 
-tests consume the same scenario_generator + scheduling_interface seam,
-but assert decisions against known-correct expected output instead of
-measuring cost.
+tests consume the same scenario_generator + scheduling_interface +
+simulation_loop seam, but assert decisions against known-correct
+expected output instead of measuring cost.
 ```
 
 `scenario_generator` and `reference_implementations` never call each other directly; everything crosses through `scheduling_interface`.
 
 ## Status
 
-Architecture and module boundaries are defined. Implementation language, concrete data formats, and the exact `scheduling_interface` contract are not yet decided — that is the next step.
+Architecture and module boundaries are defined. The implementation language is Python (ADR-004). `domain` is implemented as the canonical shared entities (ADR-005). `scenario_generator` and `scheduling_interface` are implemented. `reference_implementations` has three algorithms implemented — Round Robin, Proportional Fair, and MaxCQI. `simulation_loop` v0.1 is implemented (ADR-009). `benchmark` is not yet implemented.
 
 Architecturally significant decisions, once made, are recorded as ADRs in [`docs/adr/`](adr/).
