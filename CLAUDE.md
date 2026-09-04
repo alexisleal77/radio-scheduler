@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Radio Scheduler is a modular environment for developing, testing, benchmarking, and comparing radio scheduling algorithms for 5G/6G networks. See [`README.md`](README.md) for goals and [`docs/architecture.md`](docs/architecture.md) for the full architecture (module responsibilities, data flow, design principles).
 
-The project is developed incrementally, one small step at a time, starting from an empty scaffold. Expect this file to be updated as the codebase grows — tech stack and build/test commands are not yet decided.
+The project is developed incrementally, one small step at a time. It is no longer an empty scaffold: the implementation language and tooling are decided (Python + uv + Hatchling, see [ADR-004](docs/adr/ADR-004-implementation-language-and-tooling.md)), and `src/`, `tests/`, and `docs/` are built out accordingly. Expect this file to be updated as the codebase grows.
 
 ## How to work in this repo
 
@@ -17,4 +17,10 @@ The project is developed incrementally, one small step at a time, starting from 
 
 ## Commands
 
-No build, lint, or test tooling exists yet — the repository currently contains only empty `src/` and `docs/` scaffolding. Once a language/stack is chosen and initial tooling is added, update this section with the actual build/lint/test/benchmark commands (including how to run a single test).
+Dependency/environment management is via `uv` (ADR-004). Tests use the standard-library `unittest`:
+
+- Run the full suite: `uv run python -m unittest discover -s tests -v`
+- Run a single file: `uv run python -m unittest tests.test_simulation_loop -v`
+- Run a single test: `uv run python -m unittest tests.test_simulation_loop.DrainRuleTests.test_drain_is_applied_after_allocate_and_visible_starting_next_tti -v`
+
+No lint or benchmark-runner command is configured yet; update this section when one is added.

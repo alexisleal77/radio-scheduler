@@ -1,5 +1,7 @@
 # Architecture Review
 
+> **Historical document.** This review reflects the design as of the initial, pre-implementation repository scaffold. The gaps and open questions it raises have since been resolved through ADR-001 through ADR-010 and the corresponding implementations (see [`docs/architecture.md`](architecture.md) and [`docs/adr/`](adr/) for current state). Kept for historical reference only — not current guidance.
+
 Review of the Radio Scheduler design as of the initial repository scaffold: `README.md`, `CLAUDE.md`, `docs/architecture.md`, and the module-level `README.md` files under `src/`, `tests/`, and `scripts/`. No implementation code exists yet, so this reviews the *design*, treated as a pre-implementation architecture spec.
 
 The module boundaries and the principle that everything crosses through `scheduling_interface` are sound and worth keeping. The gaps below are mostly forks in the design that will be expensive to change once code exists, so they are worth resolving before language selection and implementation begin.

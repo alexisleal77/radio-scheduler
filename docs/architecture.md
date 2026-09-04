@@ -63,6 +63,6 @@ expected output instead of measuring cost.
 
 ## Status
 
-Architecture and module boundaries are defined. The implementation language is Python (ADR-004). `domain` is implemented as the canonical shared entities (ADR-005). `scenario_generator` and `scheduling_interface` are implemented. `reference_implementations` has three algorithms implemented — Round Robin, Proportional Fair, and MaxCQI. `simulation_loop` v0.1 is implemented (ADR-009). `benchmark` v0.1 is implemented (ADR-010), scoped to computational cost only — scheduling-performance metrics remain deferred.
+Architecture and module boundaries are defined. The implementation language is Python (ADR-004). `domain` is implemented as the canonical shared entities (ADR-005). `scenario_generator` and `scheduling_interface` are implemented. `reference_implementations` has three algorithms implemented — Round Robin, Proportional Fair, and MaxCQI. `simulation_loop` v0.1 is implemented (ADR-009). `benchmark` v0.1 is implemented (ADR-010), scoped to computational cost only — scheduling-performance metrics remain deferred. `scripts` is not yet implemented.
 
 Architecturally significant decisions, once made, are recorded as ADRs in [`docs/adr/`](adr/).
