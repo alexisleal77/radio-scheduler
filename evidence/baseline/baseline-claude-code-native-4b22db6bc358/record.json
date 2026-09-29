@@ -1,0 +1,57 @@
+{
+  "run_id": "baseline-claude-code-native-4b22db6bc358",
+  "configuration_id": "claude-code-native",
+  "task_id": "radio-scheduler-candidate-v0.1",
+  "task_version": "0.1.0",
+  "base_commit": "5e06ec90c98f55eeaac7c1447757c98a03e33b14",
+  "interface_version": "scheduling_interface-v0.1",
+  "agent_version": "2.1.207 (Claude Code)",
+  "model_identity": "unspecified (session/account default; --model was not passed, per instruction not to presume or select an active model)",
+  "invocation_mode": "cli_print_isolated_worktree",
+  "terminal_candidate": "/home/alexis/Projetos/radio-scheduler/evidence/baseline/baseline-claude-code-native-4b22db6bc358/frozen_candidate.py",
+  "terminal_hash": "52eb9f7942f7a4ce4831f9096a8f0c9e036df2cb3ab031715aad630561263c62",
+  "termination_reason": "checks_passed",
+  "evidence_manifest": {
+    "content_sha256": "52eb9f7942f7a4ce4831f9096a8f0c9e036df2cb3ab031715aad630561263c62",
+    "interface_version": "scheduling_interface-v0.1",
+    "python_implementation": "CPython",
+    "python_version": "3.14.6",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39"
+  },
+  "public_evaluation": {
+    "mode": "public_demo",
+    "integrity_ok": true,
+    "categories": {
+      "build_validity": true,
+      "interface_conformance": true,
+      "functional_correctness": true,
+      "domain_conformance": true
+    },
+    "checks": [
+      {
+        "check_id": "build_validity",
+        "category": "build_validity",
+        "passed": true,
+        "detail": "candidate module loaded and build_algorithm() returned a valid object"
+      },
+      {
+        "check_id": "interface_conformance",
+        "category": "interface_conformance",
+        "passed": true,
+        "detail": "simulation_loop.run() completed without a contract violation on ue_competition and cqi_difference"
+      },
+      {
+        "check_id": "served_ue_must_have_backlog",
+        "category": "functional_correctness",
+        "passed": true,
+        "detail": "ok"
+      },
+      {
+        "check_id": "no_eligibility_or_resources_yields_empty_decisions",
+        "category": "domain_conformance",
+        "passed": true,
+        "detail": "ok"
+      }
+    ]
+  }
+}

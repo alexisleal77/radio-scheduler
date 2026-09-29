@@ -1,0 +1,334 @@
+{
+  "metadata": {
+    "commit": "1866fe4d4b277cb9a080bad6649c2ebee8f2f74a",
+    "command": "uv run python scripts/demo.py",
+    "generated_at": "2026-09-29T23:01:58.715598+00:00"
+  },
+  "results": [
+    {
+      "scenario_id": "ue_competition",
+      "scenario_description": "Duas UEs, CQI empatado (10) em toda TTI, ambas com backlog em toda TTI — isola a política de cada algoritmo (rotação do RR, justiça por média de throughput do PF, escolha gulosa e sem memória do MaxCQI) sem nenhuma diferença de qualidade de canal para justificá-la.",
+      "scheduler_name": "RoundRobin",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {
+        "0": [
+          {
+            "ue_id": "ue-0",
+            "resource_block_ids": [
+              "rb-0-0"
+            ]
+          },
+          {
+            "ue_id": "ue-1",
+            "resource_block_ids": [
+              "rb-0-1"
+            ]
+          }
+        ],
+        "1": [
+          {
+            "ue_id": "ue-0",
+            "resource_block_ids": [
+              "rb-1-0"
+            ]
+          },
+          {
+            "ue_id": "ue-1",
+            "resource_block_ids": [
+              "rb-1-1"
+            ]
+          }
+        ]
+      },
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 41215.5,
+        "median_cpu_time_ns": 40173.0,
+        "median_peak_traced_memory_bytes": 4968.0,
+        "scenario_seed": 101,
+        "scenario_num_ttis": 2,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          2,
+          2
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "ue_competition",
+      "scenario_description": "Duas UEs, CQI empatado (10) em toda TTI, ambas com backlog em toda TTI — isola a política de cada algoritmo (rotação do RR, justiça por média de throughput do PF, escolha gulosa e sem memória do MaxCQI) sem nenhuma diferença de qualidade de canal para justificá-la.",
+      "scheduler_name": "ProportionalFair",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {
+        "0": [
+          {
+            "ue_id": "ue-0",
+            "resource_block_ids": [
+              "rb-0-0",
+              "rb-0-1"
+            ]
+          }
+        ],
+        "1": [
+          {
+            "ue_id": "ue-1",
+            "resource_block_ids": [
+              "rb-1-0",
+              "rb-1-1"
+            ]
+          }
+        ]
+      },
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 39248.0,
+        "median_cpu_time_ns": 38883.5,
+        "median_peak_traced_memory_bytes": 4896.0,
+        "scenario_seed": 101,
+        "scenario_num_ttis": 2,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          2,
+          2
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "ue_competition",
+      "scenario_description": "Duas UEs, CQI empatado (10) em toda TTI, ambas com backlog em toda TTI — isola a política de cada algoritmo (rotação do RR, justiça por média de throughput do PF, escolha gulosa e sem memória do MaxCQI) sem nenhuma diferença de qualidade de canal para justificá-la.",
+      "scheduler_name": "MaxCQI",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {
+        "0": [
+          {
+            "ue_id": "ue-0",
+            "resource_block_ids": [
+              "rb-0-0",
+              "rb-0-1"
+            ]
+          }
+        ],
+        "1": [
+          {
+            "ue_id": "ue-0",
+            "resource_block_ids": [
+              "rb-1-0",
+              "rb-1-1"
+            ]
+          }
+        ]
+      },
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 33385.0,
+        "median_cpu_time_ns": 32947.5,
+        "median_peak_traced_memory_bytes": 4664.0,
+        "scenario_seed": 101,
+        "scenario_num_ttis": 2,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          2,
+          2
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "cqi_difference",
+      "scenario_description": "Duas UEs, um Resource Block, uma TTI, ambas em cold-start: só o CQI difere (ue-0=3, ue-1=12). Mostra o MaxCQI escolhendo por CQI puro, enquanto RR e PF (em cold-start) escolhem por ordem canônica, CQI-cego.",
+      "scheduler_name": "RoundRobin",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {
+        "0": [
+          {
+            "ue_id": "ue-0",
+            "resource_block_ids": [
+              "rb-0-0"
+            ]
+          }
+        ]
+      },
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 23311.5,
+        "median_cpu_time_ns": 22855.0,
+        "median_peak_traced_memory_bytes": 3712.0,
+        "scenario_seed": 102,
+        "scenario_num_ttis": 1,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          1
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "cqi_difference",
+      "scenario_description": "Duas UEs, um Resource Block, uma TTI, ambas em cold-start: só o CQI difere (ue-0=3, ue-1=12). Mostra o MaxCQI escolhendo por CQI puro, enquanto RR e PF (em cold-start) escolhem por ordem canônica, CQI-cego.",
+      "scheduler_name": "ProportionalFair",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {
+        "0": [
+          {
+            "ue_id": "ue-0",
+            "resource_block_ids": [
+              "rb-0-0"
+            ]
+          }
+        ]
+      },
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 24818.0,
+        "median_cpu_time_ns": 24391.0,
+        "median_peak_traced_memory_bytes": 3816.0,
+        "scenario_seed": 102,
+        "scenario_num_ttis": 1,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          1
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "cqi_difference",
+      "scenario_description": "Duas UEs, um Resource Block, uma TTI, ambas em cold-start: só o CQI difere (ue-0=3, ue-1=12). Mostra o MaxCQI escolhendo por CQI puro, enquanto RR e PF (em cold-start) escolhem por ordem canônica, CQI-cego.",
+      "scheduler_name": "MaxCQI",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {
+        "0": [
+          {
+            "ue_id": "ue-1",
+            "resource_block_ids": [
+              "rb-0-0"
+            ]
+          }
+        ]
+      },
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 20785.5,
+        "median_cpu_time_ns": 20508.5,
+        "median_peak_traced_memory_bytes": 3480.0,
+        "scenario_seed": 102,
+        "scenario_num_ttis": 1,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          1
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "no_eligibility_or_resources",
+      "scenario_description": "Duas condições de contorno distintas: TTI 0 tem Resource Block mas nenhuma UE elegível (sem backlog); TTI 1 tem UEs elegíveis mas nenhum Resource Block disponível. As três implementações devem retornar zero decisões em ambos os casos, sem erro.",
+      "scheduler_name": "RoundRobin",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {},
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 27965.0,
+        "median_cpu_time_ns": 27700.0,
+        "median_peak_traced_memory_bytes": 3976.0,
+        "scenario_seed": 103,
+        "scenario_num_ttis": 2,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          1,
+          0
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "no_eligibility_or_resources",
+      "scenario_description": "Duas condições de contorno distintas: TTI 0 tem Resource Block mas nenhuma UE elegível (sem backlog); TTI 1 tem UEs elegíveis mas nenhum Resource Block disponível. As três implementações devem retornar zero decisões em ambos os casos, sem erro.",
+      "scheduler_name": "ProportionalFair",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {},
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 33227.5,
+        "median_cpu_time_ns": 32820.5,
+        "median_peak_traced_memory_bytes": 4488.0,
+        "scenario_seed": 103,
+        "scenario_num_ttis": 2,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          1,
+          0
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    },
+    {
+      "scenario_id": "no_eligibility_or_resources",
+      "scenario_description": "Duas condições de contorno distintas: TTI 0 tem Resource Block mas nenhuma UE elegível (sem backlog); TTI 1 tem UEs elegíveis mas nenhum Resource Block disponível. As três implementações devem retornar zero decisões em ambos os casos, sem erro.",
+      "scheduler_name": "MaxCQI",
+      "scheduler_version": "0.1",
+      "decisions_by_tti": {},
+      "benchmark": {
+        "repetitions": 10,
+        "median_wall_time_ns": 28061.5,
+        "median_cpu_time_ns": 27733.0,
+        "median_peak_traced_memory_bytes": 4152.0,
+        "scenario_seed": 103,
+        "scenario_num_ttis": 2,
+        "scenario_num_ues": 2,
+        "scenario_resource_blocks_per_tti": [
+          1,
+          0
+        ],
+        "python_implementation": "CPython",
+        "python_version": "3.14.6",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "processor": "x86_64",
+        "cpu_count": 16
+      }
+    }
+  ]
+}
