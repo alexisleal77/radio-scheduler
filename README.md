@@ -27,7 +27,7 @@ src/radio_scheduler/                   Python package (ADR-004, ADR-005)
   simulation_loop/                      Runs a scheduling algorithm against a Scenario, TTI by TTI — implemented (v0.1)
   benchmark/                            Measures computational cost (wall-clock time, CPU time, peak traced Python memory) of running a scheduling algorithm — implemented (v0.1); radio-performance metrics (throughput, fairness, latency/QoS) out of scope
 tests/                                  Functional tests with expected outputs — implemented for scenario_generator, scheduling_interface, Round Robin, Proportional Fair, MaxCQI, simulation_loop, and benchmark
-scripts/                                Operational entry points (run benchmarks, generate reports, etc.) — not yet implemented
+scripts/                                Operational entry points (run benchmarks, generate reports, etc.) — `run_benchmark.py` implemented (fixed example); others not yet implemented
 ```
 
 See [`docs/architecture.md`](docs/architecture.md) for the full architecture, including module responsibilities and data flow. Architecturally significant decisions are recorded in [`docs/adr/`](docs/adr/).
