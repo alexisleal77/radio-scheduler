@@ -131,4 +131,4 @@ evaluator.
    `docs/proposal-traceability.md`'s last section: qualifying a
    specialized model, building a genuinely separate protected evaluator,
    and the final experiment's task/repetition/statistical plan, all
-   reserved for review with Cristiano Bonato Both and Antonio M. Alberti.
+   reserved for review with the thesis advisors.

@@ -86,5 +86,5 @@ below.
   boundary and a protected test package.
 - The final comparative experiment: task/repetition counts, statistical
   plan, and formal acceptance protocol — reserved for review with
-  Cristiano Bonato Both and Antonio M. Alberti per the V21 document's own
+  the thesis advisors per the V21 document's own
   chapters 4-6.

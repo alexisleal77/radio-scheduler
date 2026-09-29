@@ -1,10 +1,10 @@
 # Design document: component, experimental environment, and HARNESS6G
 
-This document exists to keep three architectures that this project deliberately treats as separate — visibly separate, in one place. It responds directly to two pieces of advising feedback from the 2026-09-11 meeting: Cristiano Bonato Both's car/road distinction (the architecture of the thing built is not the architecture of the environment that tests it), and Antonio M. Alberti's observation that prior documents mixed components, general architecture, functionality, and implementation together.
+This document exists to keep three architectures that this project deliberately treats as separate — visibly separate, in one place. It responds directly to two pieces of advising feedback from the 2026-09-11 meeting: the primary advisor's car/road distinction (the architecture of the thing built is not the architecture of the environment that tests it), and the co-advisor's observation that prior documents mixed components, general architecture, functionality, and implementation together.
 
 None of the three sections below duplicates its own module's detail. Each links to the ADR, specification, or module `README.md` that already owns that detail; this document's job is only to say what exists, where its boundary is, and how the three relate.
 
-| Cristiano's example | Corresponds to | Detail lives in |
+| Car/road example | Corresponds to | Detail lives in |
 |---|---|---|
 | The car, its parts, and how they connect | The scheduling component: contract, entities, reference implementations | [§1](#1-architecture-of-the-scheduling-component-the-car) |
 | The road, asphalt, or treadmill | The experimental environment: scenarios, closed-loop execution, checks, measurement | [§2](#2-architecture-of-the-experimental-environment-the-road) |

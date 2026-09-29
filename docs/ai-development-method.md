@@ -1,10 +1,10 @@
 # AI development method
 
-Antonio M. Alberti asked, in the 2026-09-11 advising meeting, that the LLM
+The co-advisor asked, in the 2026-09-11 advising meeting, that the LLM
 used to *build* this project be distinguished from the LLM that will
 *integrate the researched system* (HARNESS6G's candidate-generation loop),
-and that the method of using the development agent be recorded. Cristiano
-Bonato Both agreed. This document is that record. It distinguishes three
+and that the method of using the development agent be recorded. The
+primary advisor agreed. This document is that record. It distinguishes three
 roles this repository now involves — never conflating them:
 
 | Role | What it does | Where its record lives |
