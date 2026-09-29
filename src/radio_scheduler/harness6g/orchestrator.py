@@ -26,7 +26,7 @@ def run_harness6g(
     mode: str,
 ) -> dict:
     """Runs the task -> context -> candidate -> checks -> feedback ->
-    termination -> freeze flow (V21 §10) over a fixed, ordered sequence of
+    termination -> freeze flow (HARNESS6G proposal §10) over a fixed, ordered sequence of
     candidate source-file revisions.
 
     `mode` must be one of "live" (a real candidate-generating invocation
@@ -35,7 +35,7 @@ def run_harness6g(
     qualified specialized model), or "import" (a single externally
     produced candidate, captured as-is). Recorded verbatim in the
     returned evidence dict so no run is ever ambiguous about its origin
-    (V21 §12) — this function itself never invokes a model; the caller is
+    (HARNESS6G proposal §12) — this function itself never invokes a model; the caller is
     responsible for how `candidate_revisions` was produced.
 
     Stops as soon as one revision passes every exposed check

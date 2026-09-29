@@ -94,7 +94,7 @@ def run_baseline(
 ) -> dict:
     """Runs one baseline configuration against the same canonical task
     HARNESS6G candidates satisfy, producing the common terminal record
-    (V21 §13): `run_id, configuration_id, task_id, terminal_candidate,
+    (HARNESS6G proposal §13): `run_id, configuration_id, task_id, terminal_candidate,
     terminal_hash, termination_reason, evidence_manifest`.
 
     Flow: (1) create an isolated git worktree at `config.base_commit` —

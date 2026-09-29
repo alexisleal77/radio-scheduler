@@ -1,11 +1,11 @@
 # baseline
 
-Delivery C of the HARNESS6G V21 integration: an executable entry point for
-the *scientific* baseline the V21 protocol compares HARNESS6G against — a
+Delivery C of the HARNESS6G integration: an executable entry point for
+the *scientific* baseline the HARNESS6G protocol compares HARNESS6G against — a
 general-purpose coding agent with its native model/runtime — as distinct
 from Round Robin/Proportional Fair/MaxCQI, which are algorithm baselines
 used to exercise the environment (see `docs/design.md` §3 and the
-distinction table in the V21 prompt's §13).
+distinction table in the HARNESS6G proposal's §13).
 
 ## What this is, concretely
 
@@ -57,7 +57,7 @@ end, not only in a stub.
 
 ## Adding another configuration
 
-Per the V21 prompt's own guidance, one operational baseline suffices for
+Per the HARNESS6G proposal's own guidance, one operational baseline suffices for
 this delivery; adding another is meant to be a small adapter, not a
 change to the task, interface, or evaluator. Concretely: write a new
 `*_configuration()` function returning a `BaselineConfiguration` with a

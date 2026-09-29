@@ -1,6 +1,6 @@
-# HARNESS6G V21 — proposal traceability
+# HARNESS6G — proposal traceability
 
-Links every V21 commitment this delivery addresses to a concrete mechanism,
+Links every HARNESS6G commitment this delivery addresses to a concrete mechanism,
 file, and piece of evidence — never a document alone standing in for a
 working mechanism. States used below: **implemented and executed**
 (mechanism exists and has actually been run, with evidence to show for
@@ -10,8 +10,8 @@ decision/infrastructure** (blocked on something outside this repository's
 control — an advisor decision, a protected package, a qualified model).
 
 This is a snapshot as of commit `25bf6b2` on branch `harness6g/v0.1-delivery`
-(2026-09-29). It does not reopen or restate the V21 document's own content,
-chapters, questions, or hypothesis — see `HARNESS6G_v21_FINAL.pdf` for
+(2026-09-29). It does not reopen or restate the HARNESS6G proposal's own content,
+chapters, questions, or hypothesis — see the HARNESS6G thesis proposal document for
 those; chapters 4-6 remain provisional there, and nothing here changes
 that.
 
@@ -49,9 +49,9 @@ below.
 | Same evaluator for both configurations | `evaluate_public()` called identically from the baseline runner and available to any HARNESS6G run | `harness6g/evaluator.py` | Both evidence directories show identical `"categories"` keys, produced by the same function | Implemented and executed |
 | Joint demonstration table (configuration/origin/mode/evidence) | `docs/demo.md`'s results table | `docs/demo.md` | — | Implemented and executed |
 | **Protected evaluation** (separate from the generator, final acceptance) | `evaluate_protected()` — always raises `ProtectedEvaluationUnavailable` | `harness6g/evaluator.py` | `tests/test_harness6g.py::EvaluatorTests::test_evaluate_protected_always_refuses` | **Dependent on decision/infrastructure** — no protected package or isolated evaluator process exists; none is fabricated here |
-| Final comparative experiment (H1) | — | — | — | **Planned** — reserved for the V21 protocol and advisor review; this delivery's checks/tests are demo/public evidence, never presented as H1 support |
+| Final comparative experiment (H1) | — | — | — | **Planned** — reserved for the HARNESS6G protocol and advisor review; this delivery's checks/tests are demo/public evidence, never presented as H1 support |
 
-## Other V21 §10 commitments (cutting across SRQ1-3)
+## Other HARNESS6G proposal §10 commitments (cutting across SRQ1-3)
 
 | Requirement | Mechanism | File | Evidence | State |
 |---|---|---|---|---|
@@ -86,5 +86,5 @@ below.
   boundary and a protected test package.
 - The final comparative experiment: task/repetition counts, statistical
   plan, and formal acceptance protocol — reserved for review with
-  the thesis advisors per the V21 document's own
+  the thesis advisors per the HARNESS6G proposal's own
   chapters 4-6.

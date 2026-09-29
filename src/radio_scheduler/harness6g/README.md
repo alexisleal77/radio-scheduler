@@ -1,7 +1,7 @@
 # harness6g
 
 Minimal, real (not merely documented) implementation of Delivery B of the
-HARNESS6G V21 integration: the engineering-harness flow that materializes a
+HARNESS6G integration: the engineering-harness flow that materializes a
 candidate scheduling component inside a restricted scope, runs exposed
 checks against it, records structured observations, and — on termination —
 freezes a terminal candidate for a separate evaluator. See
@@ -40,7 +40,7 @@ revision's check subprocess exceeds `stopping_policy.timeout_seconds`
 (`"timeout"` — a genuine OS-level process kill, not an in-process flag; see
 `checks.CheckTimeoutError` and `_check_runner.py`).
 
-## The four V21 acceptance categories, made concrete
+## The four HARNESS6G acceptance categories, made concrete
 
 | Category | Check | What it actually verifies |
 |---|---|---|
@@ -51,7 +51,7 @@ revision's check subprocess exceeds `stopping_policy.timeout_seconds`
 
 All four run against the exact same demo scenarios Delivery A already
 uses (`radio_scheduler.demo.scenarios`) — never against protected material,
-because none exists in this repository (§14 of the V21 prompt: this
+because none exists in this repository (§14 of the HARNESS6G proposal: this
 project does not fabricate a protected evaluator to complete the picture).
 
 ## What is, and is not, isolated

@@ -1,4 +1,4 @@
-"""Demonstration entry point for Delivery A (HARNESS6G V21 integration):
+"""Demonstration entry point for Delivery A (HARNESS6G integration):
 runs Round Robin, Proportional Fair, and MaxCQI over the same small,
 hand-built demo scenarios (radio_scheduler.demo.scenarios), records
 per-TTI decisions and computational-cost benchmarks, and writes a

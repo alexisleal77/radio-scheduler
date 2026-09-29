@@ -4,7 +4,7 @@ Orchestrates already-implemented and already-tested public APIs
 (`scenario_generator`-style hand-built `Scenario`s, `reference_implementations`,
 `simulation_loop`, `benchmark`) to produce a small, demonstrable, reproducible
 run of Round Robin, Proportional Fair, and MaxCQI over the same scenarios —
-Delivery A of the HARNESS6G V21 integration (see
+Delivery A of the HARNESS6G integration (see
 [`docs/design.md`](../../../docs/design.md) and
 [`docs/proposal-traceability.md`](../../../docs/proposal-traceability.md)).
 

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CheckResult:
-    """One exposed check's outcome for one candidate revision (V21 §15's
+    """One exposed check's outcome for one candidate revision (HARNESS6G proposal §15's
     four acceptance categories: build_validity, interface_conformance,
     functional_correctness, domain_conformance)."""
 
@@ -17,7 +17,7 @@ class CheckResult:
 class Observation:
     """One candidate revision's structured observation: its content hash
     (empty string if it never got far enough to be read) and every
-    exposed check's result, tied together for the evidence package (V21
+    exposed check's result, tied together for the evidence package (HARNESS6G proposal
     §10 point 6)."""
 
     revision_index: int
@@ -35,7 +35,7 @@ class RunState:
 
     `termination_reason` is `None` only while the run is still in
     progress; every terminated run's evidence package carries a non-`None`
-    value (V21 §10 point 7 — termination policy and its actually-recorded
+    value (HARNESS6G proposal §10 point 7 — termination policy and its actually-recorded
     reason)."""
 
     observations: tuple[Observation, ...] = ()

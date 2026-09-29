@@ -17,7 +17,7 @@ Using Claude Code to build this project does **not** mean a specialized
 model has been integrated into HARNESS6G, and running the baseline
 configuration from inside this development session does **not** constitute
 a valid final comparison run — both are named explicitly wherever they
-appear, per the V21 prompt's own §4-5 instructions.
+appear, per the HARNESS6G proposal's own §4-5 instructions.
 
 ## Method for history before this session
 
@@ -46,7 +46,7 @@ verifiable from existing evidence:
 
 **Trigger.** The user (Alexis Leal) pasted a master prompt ("Prompt mestre
 para Claude Code: Radio Scheduler e integração inicial com HARNESS6G",
-referencing `HARNESS6G_v21_FINAL.pdf` v21) instructing continuation from
+referencing the HARNESS6G thesis proposal document) instructing continuation from
 the real checkpoint, an audit, and delivery of three concrete artifacts
 (a demonstrable Radio Scheduler run, a minimal engineering-harness
 integration, and an executable baseline entry) without per-increment
@@ -138,8 +138,8 @@ environment, concretely:
    `radio_scheduler.harness6g.verify_integrity(run_dir)` before trusting
    any frozen candidate, and
    `radio_scheduler.harness6g.evaluate_public(run_dir, task_spec)` for the
-   four V21 acceptance categories — understanding that this is a
-   demo/public verification, not the protected, final acceptance the V21
+   four HARNESS6G acceptance categories — understanding that this is a
+   demo/public verification, not the protected, final acceptance the HARNESS6G proposal
    protocol reserves for a separately-controlled evaluator
    (`evaluate_protected()` always refuses in this repository; see
    `docs/proposal-traceability.md`).

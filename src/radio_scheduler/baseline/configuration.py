@@ -6,9 +6,9 @@ from radio_scheduler.harness6g import default_scheduling_candidate_task
 
 @dataclass(frozen=True)
 class BaselineConfiguration:
-    """Everything the V21 prompt's common entry contract requires to be
+    """Everything the HARNESS6G proposal's common entry contract requires to be
     accepted and recorded for one baseline configuration, before any
-    invocation happens (V21 §13's `configuration_id, task_id, ...` list).
+    invocation happens (HARNESS6G proposal §13's `configuration_id, task_id, ...` list).
     """
 
     configuration_id: str
@@ -46,7 +46,7 @@ def claude_code_native_configuration(
     (`claude -p`) inside an isolated git worktree checked out at
     `base_commit`. `model_identity` is deliberately not forced via
     `--model` — this project does not presume or select which model is
-    active (V21 prompt §13); it is recorded as "unspecified" rather than
+    active (HARNESS6G proposal §13); it is recorded as "unspecified" rather than
     guessed.
     """
     task = default_scheduling_candidate_task()

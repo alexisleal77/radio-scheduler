@@ -11,7 +11,7 @@ class CandidateBuildError(Exception):
     """Raised when a candidate source file is outside its task's
     editable_scope, or cannot be loaded / does not expose the required
     `build_algorithm()` factory returning a `SchedulingAlgorithm`-shaped
-    object — this is "build validity" (V21 §15)."""
+    object — this is "build validity" (HARNESS6G proposal §15)."""
 
 
 def candidate_hash(source_text: str) -> str:

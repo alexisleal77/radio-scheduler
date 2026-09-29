@@ -19,7 +19,7 @@ def freeze_candidate(source_path: Path, interface_version: str, run_dir: Path) -
     """Copies the accepted candidate's source into `run_dir` (so later
     changes to the original file can never retroactively alter what was
     evaluated) and writes a manifest carrying its content hash plus the
-    dependency/interface identity it was frozen under (V21 §10 point 5,
+    dependency/interface identity it was frozen under (HARNESS6G proposal §10 point 5,
     §12's "congelamento com manifesto e hash")."""
     run_dir.mkdir(parents=True, exist_ok=True)
     frozen_source_path = run_dir / "frozen_candidate.py"
@@ -32,7 +32,7 @@ def freeze_candidate(source_path: Path, interface_version: str, run_dir: Path) -
 def verify_integrity(run_dir: Path) -> bool:
     """Recomputes the frozen candidate's content hash and compares it to
     its manifest — must be called, and must return True, before any
-    evaluation of a frozen candidate (V21 §12's "verificação de
+    evaluation of a frozen candidate (HARNESS6G proposal §12's "verificação de
     integridade antes de qualquer avaliação posterior")."""
     manifest_path = run_dir / "frozen_manifest.json"
     frozen_source_path = run_dir / "frozen_candidate.py"

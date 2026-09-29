@@ -9,7 +9,7 @@ class ProtectedEvaluationUnavailable(Exception):
     """Raised by `evaluate_protected` whenever no protected evaluation
     package/protocol is configured. The formal/protected evaluation path
     must refuse to run rather than silently fall back to public checks
-    (V21 §14-15) — this project has no protected material at all, so this
+    (HARNESS6G proposal §14-15) — this project has no protected material at all, so this
     exception is the only thing `evaluate_protected` can ever do."""
 
 
@@ -17,9 +17,9 @@ def evaluate_public(run_dir: Path, task_spec: TaskSpec) -> dict:
     """Demo/public evaluation entry: verifies the frozen candidate's
     integrity, then re-runs the same exposed checks against it —
     deliberately the *same* checks already run during materialization
-    (V21 §14: no protected material exists to separate from here). This
+    (HARNESS6G proposal §14: no protected material exists to separate from here). This
     is explicitly a demonstration verification, never the protected final
-    acceptance the V21 protocol reserves for a separately-controlled
+    acceptance the HARNESS6G protocol reserves for a separately-controlled
     evaluator."""
     if not verify_integrity(run_dir):
         return {"mode": "public_demo", "integrity_ok": False, "categories": {}}
@@ -46,7 +46,7 @@ def evaluate_protected(run_dir: Path, protected_package_path: Path | None) -> di
     """Always refuses in this repository: there is no protected evaluator
     package, protocol, or isolation mechanism implemented — building one
     would require executing untrusted candidate code outside the
-    generator's own reach (V21 §14), which this v0.1 harness does not
+    generator's own reach (HARNESS6G proposal §14), which this v0.1 harness does not
     attempt. Exists so the formal path fails loudly instead of silently
     degrading to the public checks above."""
     raise ProtectedEvaluationUnavailable(

@@ -1,4 +1,4 @@
-# Checkpoint — HARNESS6G V21 integration delivery (2026-09-29)
+# Checkpoint — HARNESS6G integration delivery (2026-09-29)
 
 ## Where this is
 
@@ -95,7 +95,7 @@ full-suite run passed; none was edited to hide a regression.
   reopened or fixed by this delivery).
 - The final comparative experiment (task/repetition counts, statistical
   plan, formal protected acceptance protocol) is explicitly out of this
-  delivery's scope, reserved for the V21 protocol and advisor review.
+  delivery's scope, reserved for the HARNESS6G protocol and advisor review.
 - The `docs/adr/` physical-foldering request (car/road/harness
   subdirectories) was raised mid-session and deliberately deferred at the
   user's own choice — flat `docs/adr/` plus the classification table in

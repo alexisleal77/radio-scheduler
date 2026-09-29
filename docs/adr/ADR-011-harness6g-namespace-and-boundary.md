@@ -10,7 +10,7 @@ Accepted
 
 ## Context
 
-The HARNESS6G proposal (V21) requires an engineering-harness integration whose responsibilities — validating a task manifest, materializing a candidate scheduling algorithm inside a restricted scope, running exposed checks against it, recording structured observations, freezing a terminal candidate, and handing it to a separate evaluator — are distinct from both:
+The HARNESS6G proposal requires an engineering-harness integration whose responsibilities — validating a task manifest, materializing a candidate scheduling algorithm inside a restricted scope, running exposed checks against it, recording structured observations, freezing a terminal candidate, and handing it to a separate evaluator — are distinct from both:
 
 1. the scheduling *component* (`reference_implementations`, built against the `scheduling_interface` contract, ADR-008), and
 2. the experimental *environment* that exercises it (`scenario_generator`, `simulation_loop`, `benchmark`).

@@ -57,7 +57,7 @@ flowchart LR
     SL -->|SimulationResult| TS
 ```
 
-"How to check whether the car runs under these conditions" — oracles, invariants, acceptance criteria — is the evaluation methodology this environment exists to support; concretely, that means: functional tests with an expected-decisions oracle (§4, Delivery A), the four V21 acceptance categories (build validity, interface conformance, functional correctness, domain conformance — `docs/proposal-traceability.md`), and the computational-cost benchmark (already implemented, ADR-010). Radio-performance metrics (throughput, fairness, packet latency/QoS) remain out of scope until a CQI-to-rate/capacity model exists (ADR-006, ADR-009) — this document does not change that.
+"How to check whether the car runs under these conditions" — oracles, invariants, acceptance criteria — is the evaluation methodology this environment exists to support; concretely, that means: functional tests with an expected-decisions oracle (§4, Delivery A), the four HARNESS6G acceptance categories (build validity, interface conformance, functional correctness, domain conformance — `docs/proposal-traceability.md`), and the computational-cost benchmark (already implemented, ADR-010). Radio-performance metrics (throughput, fairness, packet latency/QoS) remain out of scope until a CQI-to-rate/capacity model exists (ADR-006, ADR-009) — this document does not change that.
 
 ## 3. Architecture of HARNESS6G
 
@@ -70,14 +70,14 @@ flowchart TD
     CHK["Exposed checks\n(oracle scenarios from §2, timeout-bounded)"]
     OBS["RunState\n(observations, revisions, correction_count,\ntermination_reason)"]
     FRZ["Freeze\n(content hash + manifest + dependency identity)"]
-    EVAL["Evaluator entry\n(public/demo vs. protected — §14 of the V21 prompt)"]
+    EVAL["Evaluator entry\n(public/demo vs. protected — §14 of the HARNESS6G proposal)"]
 
     TS --> CAND --> CHK --> OBS
     OBS -->|revise, within budget| CAND
     OBS -->|stop| FRZ --> EVAL
 ```
 
-The five V21 harness responsibilities (context, state, tools, feedback, termination) are functional commitments this flow must satisfy, not five mandatory separate modules (per the V21 prompt's own §10 note) — this project's mapping is one small, coherent module tree, listed with its exact V21 requirement and evidence in [`docs/proposal-traceability.md`](proposal-traceability.md).
+The five HARNESS6G harness responsibilities (context, state, tools, feedback, termination) are functional commitments this flow must satisfy, not five mandatory separate modules (per the HARNESS6G proposal's own §10 note) — this project's mapping is one small, coherent module tree, listed with its exact HARNESS6G requirement and evidence in [`docs/proposal-traceability.md`](proposal-traceability.md).
 
 HARNESS6G v0.1, as delivered here, runs in **demo/replay mode**: no specialized model (e.g. OTel 2.0) is qualified or connected yet (`docs/proposal-traceability.md` marks that row explicitly pending). Candidates are imported from fixtures or produced by a real, bounded invocation of a general-purpose coding agent (Delivery C's baseline path) — never presented as output of a qualified specialized model. See [`docs/demo.md`](demo.md) for exactly which runs are live invocation vs. import/replay.
 
@@ -103,6 +103,6 @@ Existing ADRs, classified by which of the three architectures above they primari
 
 - **Functional specification** (behavior, inputs, outputs, state, errors, properties): `docs/specification/domain-model-v0.1.md`, `docs/specification/benchmark-v0.1.md`, and each module's own docstrings/tests.
 - **Implementation documentation** (files, classes, functions): each module's `README.md` under `src/radio_scheduler/*/`.
-- **Evaluation protocol** (criteria, scenarios, oracles, measurement): `docs/proposal-traceability.md` (V21 requirements → mechanism → evidence) and Delivery A's demo scenarios/oracles.
+- **Evaluation protocol** (criteria, scenarios, oracles, measurement): `docs/proposal-traceability.md` (HARNESS6G requirements → mechanism → evidence) and Delivery A's demo scenarios/oracles.
 - **Checkpoint** (what is done, how it was verified, where to resume): `docs/CHECKPOINT.md`.
 - **Development method** (how Claude Code was used to build this project, as distinct from HARNESS6G's own candidate-generating model): `docs/ai-development-method.md`.

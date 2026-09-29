@@ -4,7 +4,7 @@ Exact commands to reproduce every piece of evidence this delivery
 produced, what to expect, how to interpret it, and a short script for
 presenting it to advisors. See `docs/design.md` for the architecture
 behind these commands and `docs/proposal-traceability.md` for how each
-piece maps to a V21 commitment.
+piece maps to a HARNESS6G commitment.
 
 ## 0. Environment check
 
@@ -121,7 +121,7 @@ evaluator.
    through one scenario's table.
 4. **The candidate flow** — run `scripts/harness6g_demo.py` live, showing
    one rejection and one acceptance in the same run.
-5. **The V21 commitments implemented** — `docs/proposal-traceability.md`,
+5. **The HARNESS6G commitments implemented** — `docs/proposal-traceability.md`,
    scanning the "Implemented and executed" rows and naming the
    "dependent on decision/infrastructure" ones explicitly (protected
    evaluator, specialized model, final comparative protocol).

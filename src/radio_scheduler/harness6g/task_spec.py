@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class StoppingPolicy:
-    """When a HARNESS6G run must stop trying revisions (V21 §10 point 7).
+    """When a HARNESS6G run must stop trying revisions (HARNESS6G proposal §10 point 7).
     Provisional technical parameters for this demonstration, not a
-    scientifically approved protocol setting (V21 prompt §12) — recorded
+    scientifically approved protocol setting (HARNESS6G proposal §12) — recorded
     verbatim in every run's evidence package rather than hidden."""
 
     max_revisions: int
@@ -20,7 +20,7 @@ class StoppingPolicy:
 
 @dataclass(frozen=True)
 class ResourcePolicy:
-    """Provisional technical resource bound (V21 prompt §12). v0.1 enforces
+    """Provisional technical resource bound (HARNESS6G proposal §12). v0.1 enforces
     only wall-clock time per check, via the check subprocess's own
     `timeout_seconds` (StoppingPolicy) being a real OS-level interruption.
     Memory/CPU bounding is explicitly not enforced — `enforced=False`
@@ -34,7 +34,7 @@ class ResourcePolicy:
 @dataclass(frozen=True)
 class TaskSpec:
     """Versioned task manifest validated before any candidate code executes
-    (V21 §10 points 1-2). `editable_scope` is a tuple of repository-relative
+    (HARNESS6G proposal §10 points 1-2). `editable_scope` is a tuple of repository-relative
     directory paths a candidate's source file must resolve inside — the
     only materialization boundary this v0.1 harness enforces (no
     filesystem/network sandbox beyond that containment check plus the

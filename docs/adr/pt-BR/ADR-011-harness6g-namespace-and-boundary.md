@@ -12,7 +12,7 @@ Accepted
 
 ## Contexto
 
-A proposta HARNESS6G (V21) exige uma integração de engineering harness cujas responsabilidades — validar um manifesto de tarefa, materializar um algoritmo de escalonamento candidato dentro de um escopo restrito, executar verificações expostas contra ele, registrar observações estruturadas, congelar um candidato terminal e entregá-lo a um avaliador separado — são distintas tanto:
+A proposta HARNESS6G exige uma integração de engineering harness cujas responsabilidades — validar um manifesto de tarefa, materializar um algoritmo de escalonamento candidato dentro de um escopo restrito, executar verificações expostas contra ele, registrar observações estruturadas, congelar um candidato terminal e entregá-lo a um avaliador separado — são distintas tanto:
 
 1. do *componente* de escalonamento (`reference_implementations`, construído sobre o contrato `scheduling_interface`, ADR-008), quanto
 2. do *ambiente* experimental que o exercita (`scenario_generator`, `simulation_loop`, `benchmark`).

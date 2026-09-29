@@ -1,4 +1,4 @@
-"""Baseline entry point (Delivery C of the HARNESS6G V21 integration): runs
+"""Baseline entry point (Delivery C of the HARNESS6G integration): runs
 the claude-code-native configuration — Claude Code with its native
 model/runtime, invoked non-interactively — against the exact same
 canonical task HARNESS6G candidates satisfy, inside an isolated git
