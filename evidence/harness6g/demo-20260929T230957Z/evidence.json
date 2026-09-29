@@ -1,0 +1,80 @@
+{
+  "task_id": "radio-scheduler-candidate-v0.1",
+  "task_version": "0.1.0",
+  "interface_version": "scheduling_interface-v0.1",
+  "mode": "replay",
+  "termination_reason": "checks_passed",
+  "correction_count": 1,
+  "observations": [
+    {
+      "revision_index": 0,
+      "candidate_hash": "8e3067661d312ddbfbd22b9b65abf22a267ecce1d10555a0ef54411084cc5f34",
+      "timestamp": "2026-09-29T23:09:57.651031+00:00",
+      "check_results": [
+        {
+          "check_id": "build_validity",
+          "category": "build_validity",
+          "passed": true,
+          "detail": "candidate module loaded and build_algorithm() returned a valid object"
+        },
+        {
+          "check_id": "interface_conformance",
+          "category": "interface_conformance",
+          "passed": false,
+          "detail": "ValueError: resource_block_id 'rb-0-0' assigned more than once in TTI TTI(index=0)"
+        },
+        {
+          "check_id": "served_ue_must_have_backlog",
+          "category": "functional_correctness",
+          "passed": false,
+          "detail": "ValueError: resource_block_id 'rb-0-0' assigned more than once in TTI TTI(index=0)"
+        },
+        {
+          "check_id": "no_eligibility_or_resources_yields_empty_decisions",
+          "category": "domain_conformance",
+          "passed": false,
+          "detail": "ValueError: resource_block_id 'rb-0-0' assigned more than once in TTI TTI(index=0)"
+        }
+      ]
+    },
+    {
+      "revision_index": 1,
+      "candidate_hash": "06b1748549b2350b4315d3ecb5ac9e6bc17c4978afb97c8a434458ecaf736db0",
+      "timestamp": "2026-09-29T23:09:57.701848+00:00",
+      "check_results": [
+        {
+          "check_id": "build_validity",
+          "category": "build_validity",
+          "passed": true,
+          "detail": "candidate module loaded and build_algorithm() returned a valid object"
+        },
+        {
+          "check_id": "interface_conformance",
+          "category": "interface_conformance",
+          "passed": true,
+          "detail": "simulation_loop.run() completed without a contract violation on ue_competition and cqi_difference"
+        },
+        {
+          "check_id": "served_ue_must_have_backlog",
+          "category": "functional_correctness",
+          "passed": true,
+          "detail": "ok"
+        },
+        {
+          "check_id": "no_eligibility_or_resources_yields_empty_decisions",
+          "category": "domain_conformance",
+          "passed": true,
+          "detail": "ok"
+        }
+      ]
+    }
+  ],
+  "frozen_manifest": {
+    "content_sha256": "06b1748549b2350b4315d3ecb5ac9e6bc17c4978afb97c8a434458ecaf736db0",
+    "interface_version": "scheduling_interface-v0.1",
+    "python_implementation": "CPython",
+    "python_version": "3.14.6",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39"
+  },
+  "frozen_candidate_path": "/home/alexis/Projetos/radio-scheduler/evidence/harness6g/demo-20260929T230957Z/frozen_candidate.py"
+}

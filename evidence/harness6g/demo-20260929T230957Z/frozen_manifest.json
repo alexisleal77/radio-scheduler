@@ -1,0 +1,7 @@
+{
+  "content_sha256": "06b1748549b2350b4315d3ecb5ac9e6bc17c4978afb97c8a434458ecaf736db0",
+  "interface_version": "scheduling_interface-v0.1",
+  "python_implementation": "CPython",
+  "python_version": "3.14.6",
+  "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39"
+}
