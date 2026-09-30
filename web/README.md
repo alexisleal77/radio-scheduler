@@ -21,6 +21,20 @@ python3 -m http.server 8000
 
 Then open <http://localhost:8000/web/> in a browser.
 
+## Verifying the language toggle without a browser
+
+```
+node web/verify_toggle.js
+```
+
+Runs `app.js`'s real source (not a reimplementation) inside a minimal
+simulated DOM, against the actual committed evidence JSON files, and
+asserts the PT/EN toggle updates every static string, re-renders check
+badges, and — the specific regression this checks for — never wipes the
+dynamic `harness-source-path`/`baseline-source-path` `<code>` elements
+when switching languages. Exits non-zero if any assertion fails. This
+complements, rather than replaces, an actual visual check in a browser.
+
 ## Known limitation (documented, not hidden)
 
 `app.js`'s `CONFIG` object hardcodes the current single evidence run for
