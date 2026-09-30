@@ -109,6 +109,52 @@ evaluator.
 - No protected evaluator exists in this repository — every check shown
   above is explicitly public/demo, never final protected acceptance.
 
+## Evidence-console artifact (visual companion, no terminal needed)
+
+A static, self-contained HTML page mirroring this same evidence — three
+panels (Delivery A, B, C), a PT/EN toggle, light/dark theme — can be
+generated as a Claude Code Artifact for showing advisors without a
+terminal open. It embeds the same data as `evidence/demo/results.json`,
+`evidence/harness6g/*/evidence.json`, and `evidence/baseline/*/record.json`
+directly in the file (no live fetch), so it is a frozen snapshot as of
+whenever it was generated, not a live view of `evidence/` — regenerate it
+(ask Claude Code to rebuild the artifact from the current `evidence/`
+files) if the underlying evidence changes.
+
+**How to read each panel:**
+
+- **Delivery A (scheduler demonstration):** one card per scenario, one
+  sub-block per algorithm. The table is the decision trace — which UE got
+  which Resource Block, per TTI; read it alongside the scenario's
+  description to see *why* the algorithms diverge (or don't). The three
+  stat boxes below each table (wall-clock time, CPU, peak memory) are the
+  computational-cost benchmark — not a radio-performance metric.
+- **Delivery B (HARNESS6G, replay mode):** one card per candidate
+  revision tried, each with four check rows tagged PASSED/FAILED — these
+  four rows are exactly the four V21-style acceptance categories (build
+  validity, interface conformance, functional correctness, domain
+  conformance). The last card, if present, is the frozen terminal
+  candidate with its content hash — point out that a run with zero
+  passing revisions never freezes anything.
+- **Delivery C (baseline):** a metadata block (agent/model identity, base
+  commit, termination reason) followed by the same four-category
+  checklist, produced by the exact same evaluation code as Delivery B —
+  that equivalence (same checks, same pass/fail labels, same visual
+  block) is the point to make explicit: the baseline's candidate went
+  through no separate, easier evaluator.
+
+**Sharing it:** Artifacts are private by default. Use the page's own
+share control (in the claude.ai interface, from the artifact page's share
+menu) before a meeting if the advisors need direct access; otherwise
+screen-share it live, which needs no sharing step.
+
+**Using it live:** the PT/EN toggle in the header switches every label
+and re-renders the check badges in the chosen language — useful if an
+advisor prefers reading in English. It is one static page: to update it
+after new evidence is generated, ask Claude Code to regenerate the
+artifact from the refreshed `evidence/` files rather than editing it by
+hand.
+
 ## Presentation script (for advisors)
 
 1. **The component and its contract** — `docs/design.md` §1: show
@@ -127,7 +173,10 @@ evaluator.
    evaluator, specialized model, final comparative protocol).
 6. **The baseline entry** — `evidence/baseline/.../record.json`, and the
    joint table in §4 above.
-7. **Open scientific decisions** — read directly from
+7. **(Optional, no terminal)** Use the evidence-console artifact above
+   instead of steps 2-6 if presenting on a shared screen without a
+   terminal — it covers the same three deliveries in one scrollable page.
+8. **Open scientific decisions** — read directly from
    `docs/proposal-traceability.md`'s last section: qualifying a
    specialized model, building a genuinely separate protected evaluator,
    and the final experiment's task/repetition/statistical plan, all
