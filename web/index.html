@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR" id="html-root">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Radio Scheduler — Visualizador de Evidências</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="page-header">
+  <div class="header-top">
+    <h1 data-i18n="h1">Radio Scheduler — Visualizador de Evidências</h1>
+    <div class="lang-switch" role="group" aria-label="Idioma / Language">
+      <button type="button" id="lang-pt" class="lang-btn" aria-pressed="true">POR</button>
+      <button type="button" id="lang-en" class="lang-btn" aria-pressed="false">ENG</button>
+    </div>
+  </div>
+  <p class="subtitle" data-i18n="subtitle">
+    Página estática, somente leitura — lê os arquivos já gerados em
+    <code>evidence/</code> pelos scripts existentes. Não executa nada,
+    não modifica nada. Ver <a href="../docs/demo.md">docs/demo.md</a> para
+    os comandos que produzem essas evidências.
+  </p>
+  <p class="status" id="load-status" data-i18n="loading">Carregando evidências…</p>
+</header>
+
+<main>
+
+  <section id="section-demo" class="section">
+    <h2 data-i18n="demo-title">Entrega A — Demonstração dos escalonadores</h2>
+    <p class="section-intro" data-i18n="demo-intro">
+      Round Robin, Proportional Fair e MaxCQI executados sobre os mesmos
+      cenários exógenos, com estado inicial independente por algoritmo.
+      Fonte: <code>evidence/demo/results.json</code>.
+    </p>
+    <div id="demo-content" class="content-area">
+      <p class="placeholder" data-i18n="awaiting">Aguardando dados…</p>
+    </div>
+  </section>
+
+  <section id="section-harness" class="section">
+    <h2 data-i18n="harness-title">Entrega B — HARNESS6G (modo replay)</h2>
+    <p class="section-intro">
+      <span data-i18n="harness-intro">Fluxo materializar → verificar → congelar, replay de candidatos
+      fixos (nenhum modelo especializado envolvido). Fonte:</span>
+      <code id="harness-source-path">evidence/harness6g/…/evidence.json</code>.
+    </p>
+    <div id="harness-content" class="content-area">
+      <p class="placeholder" data-i18n="awaiting">Aguardando dados…</p>
+    </div>
+  </section>
+
+  <section id="section-baseline" class="section">
+    <h2 data-i18n="baseline-title">Entrega C — Baseline (invocação real)</h2>
+    <p class="section-intro">
+      <span data-i18n="baseline-intro">Configuração <code>claude-code-native</code>, invocação real e
+      não-interativa em worktree isolado, candidato avaliado pelo mesmo
+      avaliador do HARNESS6G. Fonte:</span>
+      <code id="baseline-source-path">evidence/baseline/…/record.json</code>.
+    </p>
+    <div id="baseline-content" class="content-area">
+      <p class="placeholder" data-i18n="awaiting">Aguardando dados…</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="page-footer">
+  <p data-i18n="footer">
+    Gerado a partir de <code>evidence/</code> — ver
+    <a href="../docs/CHECKPOINT.md">docs/CHECKPOINT.md</a> para o estado
+    completo da entrega e
+    <a href="../docs/proposal-traceability.md">docs/proposal-traceability.md</a>
+    para o que está implementado vs. em aberto.
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
